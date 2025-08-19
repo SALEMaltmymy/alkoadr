@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>جامعة تبوك — الاختبارات</title>
+  <meta name="description" content="الاختبار الإلكتروني — كوادر السلامة والصحة المهنية مسار محترف" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand:#1e88e5;
+      --brand-600:#1565c0;
+      --accent:#00c853;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:"Tajawal", sans-serif;
+      color:var(--ink); background:var(--bg);
+    }
+    a{color:inherit; text-decoration:none}
+    .container{width:min(1100px, 92%); margin:auto}
+    header{
+      background:var(--card); border-bottom:1px solid #eef2f7;
+      box-shadow:var(--shadow); position:sticky; top:0; z-index:10;
+    }
+    .nav{display:flex; align-items:center; justify-content:space-between; padding:14px 0}
+    .brand{display:flex; align-items:center; gap:12px}
+    .brand img{
+      height:52px; width:auto; display:block;
+    }
+    .brand h1{font-size:20px; margin:0; font-weight:700}
+    .supervisor-avatar {
+      height: 48px;
+      width: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #eef2f7;
+    }
+    .hero{padding:60px 0; text-align:center}
+    .hero h2{
+      font-size:34px; margin-bottom:14px;
+      font-weight:800; color:var(--brand-600);
+    }
+    .hero p{
+      color:var(--muted); font-size:18px; margin-bottom:20px;
+    }
+    .subtitle{
+      font-size:20px;
+      font-weight:600;
+      margin-bottom:26px;
+      color:var(--ink);
+    }
+    .btn-lg{
+      padding:14px 20px; border-radius:14px; border:0; background:var(--accent);
+      color:#fff; font-weight:700; font-size:16px; cursor:pointer; text-decoration:none;
+      transition: transform 0.2s ease;
+    }
+    .btn-lg:hover {
+        transform: scale(1.05);
+    }
+    footer{padding:26px 0; color:var(--muted); text-align:center}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <img src="tbok.png" alt="شعار جامعة تبوك" />
+        <h1>جامعة تبوك</h1>
+      </div>
+      <img src="khld.png" alt="صورة المهندس خالد الغامدي" class="supervisor-avatar" />
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>كوادر السلامة والصحة المهنية  مسار محترف</h2>
+      <p class="subtitle">اختبار إلكتروني بإشراف <strong>المهندس أحمد الياقوت</strong></p>
+      <a class="btn-lg" href="exam.html">هل أنت جاهز ؟</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div>© <span id="year"></span> جامعة تبوك — جميع الحقوق محفوظة</div>
+      <div style="margin-top:6px">المهندس خالد الغامدي</div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

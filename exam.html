@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جامعة تبوك — كوادر السلامة والصحة المهنية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0; 
+      font-family: "Tajawal", sans-serif;
+      background: #f4f7f9;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: min(600px, 92%);
+      margin: auto; 
+      padding: 20px;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 90px;
+      height: auto;
+    }
+    h1 { text-align:center; font-weight:800; color:#1565c0; margin-bottom: 5px; }
+    h2 { text-align:center; font-weight:700; color:#333; margin-top:0; }
+    p.supervisor { text-align:center; margin:-10px 0 20px; color: #555; }
+
+    .card {
+      background: #fff; 
+      border-radius: 22px; 
+      padding: 30px 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      margin-top: 20px; 
+      transition: all .4s ease;
+      animation: fadeSlide .6s ease;
+    }
+
+    @keyframes fadeSlide {
+      from {opacity:0; transform:translateY(20px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+
+    .step { display:none; }
+    .step.active { display:block; }
+
+    .progress-bar {
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 25px;
+      height: 10px;
+    }
+    .progress {
+      background: linear-gradient(135deg, #1565c0, #1e88e5);
+      height: 100%;
+      width: 25%;
+      transition: width 0.4s ease-in-out;
+    }
+
+    input, textarea {
+      width: 100%; 
+      padding: 14px; 
+      margin: 12px 0;
+      border: 1.5px solid #ddd; 
+      border-radius: 14px;
+      font-family: inherit; 
+      font-size: 15px;
+      transition: .3s;
+      box-sizing: border-box;
+    }
+    input:focus, textarea:focus {
+      border-color:#1565c0; 
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(21,101,192,.15);
+    }
+    textarea:disabled {
+      background-color: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    button {
+      background: linear-gradient(135deg,#1565c0,#1e88e5);
+      border: none; 
+      color: #fff;
+      padding: 12px 28px; 
+      border-radius: 14px;
+      font-size: 16px; 
+      font-weight:600;
+      cursor: pointer; 
+      transition:.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px auto 0;
+      min-width: 120px;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(21,101,192,.3); }
+    button:disabled { background:#ccc; cursor:not-allowed; transform: none; box-shadow: none;}
+
+    .counter { color: #1565c0; font-weight: bold; margin-top: 8px; text-align:right; }
+    .error { color: #d32f2f; font-size:14px; margin-top:-6px; min-height: 20px; }
+    
+    .timer {
+        font-size: 18px;
+        font-weight: 700;
+        color: #d32f2f;
+        text-align: center;
+        margin-bottom: 15px;
+        background: #ffebee;
+        padding: 8px;
+        border-radius: 12px;
+    }
+    .credit {
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+        margin-top: 25px;
+    }
+    .loader {
+      width: 18px; height: 18px;
+      border: 2px solid #FFF;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="tbok.png" alt="شعار جامعة تبوك" class="logo">
+    <h1>جامعة تبوك</h1>
+    <h2>كوادر السلامة والصحة المهنية — مسار محترف</h2>
+    <p class="supervisor">المشرف: المهندس احمد الياقوت</p>
+
+    <div class="card">
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <div class="step active" id="step1">
+        <h3>الخطوة 1: الاسم</h3>
+        <input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية">
+        <div class="error" id="err1"></div>
+        <button>التالي</button>
+      </div>
+
+      <div class="step" id="step2">
+        <h3>الخطوة 2: رقم الهوية</h3>
+        <input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام">
+        <div class="error" id="err2"></div>
+        <button>التالي</button>
+      </div>
+
+      <div class="step" id="step3">
+        <h3>الخطوة 3: بيانات التواصل</h3>
+        <input type="tel" id="phone" placeholder="رقم الجوال">
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <div class="error" id="err3"></div>
+        <button>التالي</button>
+      </div>
+
+      <div class="step" id="step4">
+        <h3>الاختبار</h3>
+        <div class="timer">الوقت المتبقي: <span id="timer">07:00</span></div>
+        <p>السؤال: تحدث عن <strong>الهرم التسلسلي للسيطرة على المخاطر</strong> (200 كلمة)</p>
+        <textarea id="answer" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea>
+        <div class="counter">عدد الكلمات: <span id="wordCount">0</span> / 200</div>
+        <button>إرسال الإجابة</button>
+      </div>
+    </div>
+    <p class="credit">اعداد/المهندس خالد الغامدي</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
+      authDomain: "database-506.firebaseapp.com",
+      projectId: "database-506",
+      storageBucket: "database-506.firebasestorage.app",
+      messagingSenderId: "926446561022",
+      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let formData = {};
+    let timerInterval = null;
+
+    function startTimer(duration, display) {
+      let timer = duration, minutes, seconds;
+      timerInterval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+          clearInterval(timerInterval);
+          alert("انتهى الوقت! سيتم إرسال إجابتك الآن.");
+          document.getElementById("answer").disabled = true;
+          submitExam();
+        }
+      }, 1000);
+    }
+
+    function updateProgress(step) {
+      const progress = document.getElementById('progress');
+      const percent = step * 25;
+      progress.style.width = percent + '%';
+    }
+
+    function showStep(step) {
+      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+      document.getElementById("step" + step).classList.add("active");
+      updateProgress(step);
+
+      if (step === 4) {
+        const sevenMinutes = 7 * 60;
+        const display = document.querySelector('#timer');
+        startTimer(sevenMinutes, display);
+      }
+    }
+
+    function validateStep(current, next) {
+      let valid = true;
+      const errorDiv = document.getElementById("err" + current);
+      if (errorDiv) errorDiv.innerHTML = "";
+
+      if (current === 1) {
+        const name = document.getElementById("name").value.trim();
+        const arabicRegex = /^[\u0600-\u06FF\s]+$/;
+        if (name === "") {
+          document.getElementById("err1").innerHTML = "الاسم مطلوب";
+          valid = false;
+        } else if (!arabicRegex.test(name)) {
+          document.getElementById("err1").innerHTML = "الرجاء إدخال الاسم باللغة العربية فقط";
+          valid = false;
+        }
+      }
+      
+      if (current === 2) {
+        const idNumber = document.getElementById("idNumber").value.trim();
+        const numberRegex = /^\d{10}$/;
+        if (idNumber === "") {
+          document.getElementById("err2").innerHTML = "رقم الهوية مطلوب";
+          valid = false;
+        } else if (!numberRegex.test(idNumber)) {
+          document.getElementById("err2").innerHTML = "يجب أن يتكون رقم الهوية من 10 أرقام";
+          valid = false;
+        }
+      }
+
+      if (current === 3) {
+        const phone = document.getElementById("phone").value.trim();
+        const email = document.getElementById("email").value.trim();
+        if (phone === "" || email === "") {
+          document.getElementById("err3").innerHTML = "أدخل جميع البيانات";
+          valid = false;
+        }
+      }
+
+      if (valid) {
+        const currentButton = document.querySelector(`#step${current} button`);
+        currentButton.disabled = true;
+        currentButton.innerHTML = '<span class="loader"></span>';
+
+        setTimeout(() => {
+          if (current === 1) formData.name = document.getElementById("name").value.trim();
+          if (current === 2) formData.idNumber = document.getElementById("idNumber").value.trim();
+          if (current === 3) {
+            formData.phone = document.getElementById("phone").value.trim();
+            formData.email = document.getElementById("email").value.trim();
+          }
+          showStep(next);
+        }, 800);
+      }
+    }
+
+    document.getElementById("answer").addEventListener("input", function() {
+      const words = this.value.trim().split(/\s+/).filter(w => w.length > 0);
+      document.getElementById("wordCount").textContent = words.length;
+    });
+
+    async function submitExam() {
+      clearInterval(timerInterval); // Stop the timer if user submits manually
+      formData.answer = document.getElementById("answer").value;
+      formData.wordCount = document.getElementById("wordCount").textContent;
+      formData.timestamp = new Date().toISOString();
+
+      const submitButton = document.querySelector("#step4 button");
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span class="loader"></span>';
+
+      try {
+        await addDoc(collection(db, "exams"), formData);
+        alert("✅ تم إرسال الإجابة بنجاح");
+        location.reload();
+      } catch (e) {
+        alert("❌ خطأ أثناء الإرسال. الرجاء المحاولة مرة أخرى.");
+        console.error("Error adding document: ", e);
+        submitButton.disabled = false;
+        submitButton.textContent = "إرسال الإجابة";
+      }
+    }
+
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('paste', e => e.preventDefault());
+    
+    document.querySelector("#step1 button").addEventListener("click", () => validateStep(1, 2));
+    document.querySelector("#step2 button").addEventListener("click", () => validateStep(2, 3));
+    document.querySelector("#step3 button").addEventListener("click", () => validateStep(3, 4));
+    document.querySelector("#step4 button").addEventListener("click", submitExam);
+    
+    updateProgress(1);
+  </script>
+</body>
+</html>
