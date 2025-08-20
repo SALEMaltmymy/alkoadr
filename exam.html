@@ -6,6 +6,12 @@
   <title>جامعة تبوك — كوادر السلامة والصحة المهنية</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #1565c0;
+      --primary-gradient: linear-gradient(135deg, #1565c0, #1e88e5);
+      --success-color: #2e7d32;
+      --error-color: #d32f2f;
+    }
     body {
       margin: 0; 
       font-family: "Tajawal", sans-serif;
@@ -13,12 +19,13 @@
       color: #0f172a;
       display: flex;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
+      padding: 20px 0;
     }
     .container {
       width: min(600px, 92%);
       margin: auto; 
-      padding: 20px;
     }
     .logo {
       display: block;
@@ -26,8 +33,8 @@
       max-width: 90px;
       height: auto;
     }
-    h1 { text-align:center; font-weight:800; color:#1565c0; margin-bottom: 5px; }
-    h2 { text-align:center; font-weight:700; color:#333; margin-top:0; }
+    h1 { text-align:center; font-weight:800; color:var(--primary-color); margin-bottom: 5px; }
+    h2 { text-align:center; font-weight:700; color:#333; margin-top:0; font-size: 1.1em; }
     p.supervisor { text-align:center; margin:-10px 0 20px; color: #555; }
 
     .card {
@@ -49,90 +56,70 @@
     .step.active { display:block; }
 
     .progress-bar {
-      background: #e0e0e0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 25px;
-      height: 10px;
+      background: #e0e0e0; border-radius: 10px;
+      overflow: hidden; margin-bottom: 25px; height: 10px;
     }
     .progress {
-      background: linear-gradient(135deg, #1565c0, #1e88e5);
-      height: 100%;
-      width: 25%;
+      background: var(--primary-gradient); height: 100%;
+      width: 0%; /* Start from 0 */
       transition: width 0.4s ease-in-out;
     }
 
     input, textarea {
-      width: 100%; 
-      padding: 14px; 
-      margin: 12px 0;
-      border: 1.5px solid #ddd; 
-      border-radius: 14px;
-      font-family: inherit; 
-      font-size: 15px;
-      transition: .3s;
-      box-sizing: border-box;
+      width: 100%; padding: 14px; margin: 12px 0;
+      border: 1.5px solid #ddd; border-radius: 14px;
+      font-family: inherit; font-size: 15px;
+      transition: all .3s; box-sizing: border-box;
     }
     input:focus, textarea:focus {
-      border-color:#1565c0; 
+      border-color:var(--primary-color); 
       outline:none;
       box-shadow: 0 0 0 4px rgba(21,101,192,.15);
     }
-    textarea:disabled {
-      background-color: #f0f0f0;
-      cursor: not-allowed;
-    }
+    textarea:disabled { background-color: #f0f0f0; cursor: not-allowed; }
+    .input-error { border-color: var(--error-color) !important; }
 
     button {
-      background: linear-gradient(135deg,#1565c0,#1e88e5);
-      border: none; 
-      color: #fff;
-      padding: 12px 28px; 
-      border-radius: 14px;
-      font-size: 16px; 
-      font-weight:600;
-      cursor: pointer; 
-      transition:.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 10px auto 0;
-      min-width: 120px;
+      background: var(--primary-gradient); border: none; 
+      color: #fff; padding: 12px 28px; border-radius: 14px;
+      font-size: 16px; font-weight:600; cursor: pointer; 
+      transition:.3s; display: flex; align-items: center;
+      justify-content: center; margin: 10px auto 0;
+      min-width: 120px; min-height: 45px;
     }
     button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(21,101,192,.3); }
     button:disabled { background:#ccc; cursor:not-allowed; transform: none; box-shadow: none;}
 
-    .counter { color: #1565c0; font-weight: bold; margin-top: 8px; text-align:right; }
-    .error { color: #d32f2f; font-size:14px; margin-top:-6px; min-height: 20px; }
+    .counter { color: var(--primary-color); font-weight: bold; margin-top: 8px; text-align:right; }
+    .error { color: var(--error-color); font-size:14px; margin-top:-6px; min-height: 20px; }
     
     .timer {
-        font-size: 18px;
-        font-weight: 700;
-        color: #d32f2f;
-        text-align: center;
-        margin-bottom: 15px;
-        background: #ffebee;
-        padding: 8px;
-        border-radius: 12px;
+      font-size: 18px; font-weight: 700; color: var(--error-color);
+      text-align: center; margin-bottom: 15px; background: #ffebee;
+      padding: 8px; border-radius: 12px;
     }
-    .credit {
-        text-align: center;
-        color: #6b7280;
-        font-size: 14px;
-        margin-top: 25px;
-    }
+    .credit { text-align: center; color: #6b7280; font-size: 14px; margin-top: 25px;}
     .loader {
-      width: 18px; height: 18px;
-      border: 2px solid #FFF;
-      border-bottom-color: transparent;
-      border-radius: 50%;
-      display: inline-block;
-      animation: rotation 1s linear infinite;
+      width: 18px; height: 18px; border: 2px solid #FFF;
+      border-bottom-color: transparent; border-radius: 50%;
+      display: inline-block; animation: rotation 1s linear infinite;
     }
-
-    @keyframes rotation {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes rotation { 100% { transform: rotate(360deg); } }
+    
+    #success-message {
+      text-align: center;
+      animation: fadeSlide .6s ease;
+    }
+    #success-message .icon {
+      font-size: 60px;
+      color: var(--success-color);
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: #e8f5e9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
     }
   </style>
 </head>
@@ -143,49 +130,61 @@
     <h2>كوادر السلامة والصحة المهنية — مسار محترف</h2>
     <p class="supervisor">المشرف: المهندس احمد الياقوت</p>
 
-    <div class="card">
+    <div class="card" id="exam-card">
       <div class="progress-bar">
         <div class="progress" id="progress"></div>
       </div>
 
-      <div class="step active" id="step1">
-        <h3>الخطوة 1: الاسم</h3>
-        <input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية">
-        <div class="error" id="err1"></div>
-        <button>التالي</button>
-      </div>
+      <form id="exam-form">
+        <div class="step active" data-step="1">
+          <h3>الخطوة 1: الاسم</h3>
+          <input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية" required>
+          <div class="error" id="err1"></div>
+          <button type="button" data-next="2">التالي</button>
+        </div>
 
-      <div class="step" id="step2">
-        <h3>الخطوة 2: رقم الهوية</h3>
-        <input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام">
-        <div class="error" id="err2"></div>
-        <button>التالي</button>
-      </div>
+        <div class="step" data-step="2">
+          <h3>الخطوة 2: رقم الهوية</h3>
+          <input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام" required maxlength="10">
+          <div class="error" id="err2"></div>
+          <button type="button" data-next="3">التالي</button>
+        </div>
 
-      <div class="step" id="step3">
-        <h3>الخطوة 3: بيانات التواصل</h3>
-        <input type="tel" id="phone" placeholder="رقم الجوال">
-        <input type="email" id="email" placeholder="البريد الإلكتروني">
-        <div class="error" id="err3"></div>
-        <button>التالي</button>
-      </div>
+        <div class="step" data-step="3">
+          <h3>الخطوة 3: بيانات التواصل</h3>
+          <input type="tel" id="phone" placeholder="رقم الجوال (05XXXXXXXX)" required>
+          <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+          <div class="error" id="err3"></div>
+          <button type="button" data-next="4">التالي</button>
+        </div>
 
-      <div class="step" id="step4">
-        <h3>الاختبار</h3>
-        <div class="timer">الوقت المتبقي: <span id="timer">07:00</span></div>
-        <p>السؤال: تحدث عن <strong>ما يقوم به كلٌّ من التفتيش والتدقيق في نظام السلامة والصحة المهنية</strong> (200 كلمة)</p>
-        <textarea id="answer" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea>
-        <div class="counter">عدد الكلمات: <span id="wordCount">0</span> / 200</div>
-        <button>إرسال الإجابة</button>
-      </div>
+        <div class="step" data-step="4">
+          <h3>الاختبار</h3>
+          <div class="timer">الوقت المتبقي: <span id="timer">07:00</span></div>
+          <p>السؤال: تحدث عن <strong>ما يقوم به كلٌّ من التفتيش والتدقيق في نظام السلامة والصحة المهنية</strong> (200 كلمة)</p>
+          <textarea id="answer" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea>
+          <div id="rate-limit-warning" class="error"></div>
+          <div class="counter">عدد الكلمات: <span id="wordCount">0</span> / 200</div>
+          <button type="submit">إرسال الإجابة</button>
+        </div>
+      </form>
     </div>
+
+    <div class="card" id="success-message" style="display: none;">
+        <div class="icon">&#10004;</div>
+        <h2 style="color: var(--success-color);">تم الإرسال بنجاح!</h2>
+        <p>شكرًا لك على إتمام الاختبار. سيتم مراجعة إجابتك والتواصل معك قريبًا.</p>
+    </div>
+    
     <p class="credit">اعداد/المهندس خالد الغامدي</p>
   </div>
 
   <script type="module">
+    // Firebase Imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Firebase Config (Remember to secure your database with Firestore Security Rules)
     const firebaseConfig = {
       apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
       authDomain: "database-506.firebaseapp.com",
@@ -195,141 +194,182 @@
       appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let formData = {};
+    // --- DOM Element caching ---
+    const form = document.getElementById('exam-form');
+    const examCard = document.getElementById('exam-card');
+    const successMessage = document.getElementById('success-message');
+    const progressBar = document.getElementById('progress');
+    const nameInput = document.getElementById('name');
+    const idInput = document.getElementById('idNumber');
+    const phoneInput = document.getElementById('phone');
+    const emailInput = document.getElementById('email');
+    const answerInput = document.getElementById('answer');
+    const wordCountSpan = document.getElementById('wordCount');
+    const timerSpan = document.getElementById('timer');
+    const rateLimitWarning = document.getElementById('rate-limit-warning'); // NEW
+
     let timerInterval = null;
 
-    function startTimer(duration, display) {
-      let timer = duration, minutes, seconds;
-      timerInterval = setInterval(function () {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
+    // --- Functions (Most are unchanged) ---
+    const updateProgress = (step) => {
+      progressBar.style.width = `${(step - 1) * 33.3}%`;
+    };
 
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
+    const showStep = (stepNumber) => {
+      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+      const stepToShow = document.querySelector(`.step[data-step="${stepNumber}"]`);
+      if (stepToShow) {
+        stepToShow.classList.add("active");
+        updateProgress(stepNumber);
+        if (stepNumber === 4) {
+          startTimer(7 * 60, timerSpan);
+        }
+      }
+    };
 
-        display.textContent = minutes + ":" + seconds;
+    const showError = (step, message) => {
+      document.getElementById(`err${step}`).textContent = message;
+    };
+    
+    const clearError = (step, inputElement) => {
+      document.getElementById(`err${step}`).textContent = '';
+      if(inputElement) inputElement.classList.remove('input-error');
+    };
 
+    const validateStep = (currentStep) => {
+      clearError(currentStep);
+      let valid = true;
+      if (currentStep === 1) {
+        const arabicRegex = /^[\u0600-\u06FF\s]+$/;
+        if (nameInput.value.trim() === "") {
+          showError(1, "الاسم مطلوب"); valid = false; nameInput.classList.add('input-error');
+        } else if (!arabicRegex.test(nameInput.value)) {
+          showError(1, "الرجاء إدخال الاسم باللغة العربية فقط"); valid = false; nameInput.classList.add('input-error');
+        } else { clearError(1, nameInput); }
+      }
+      if (currentStep === 2) {
+        const numberRegex = /^\d{10}$/;
+        if (!numberRegex.test(idInput.value.trim())) {
+          showError(2, "يجب أن يتكون رقم الهوية من 10 أرقام صحيحة"); valid = false; idInput.classList.add('input-error');
+        } else { clearError(2, idInput); }
+      }
+      if (currentStep === 3) {
+        const phoneRegex = /^05\d{8}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!phoneRegex.test(phoneInput.value.trim())) {
+          showError(3, "صيغة رقم الجوال غير صحيحة (مثال: 0512345678)"); valid = false; phoneInput.classList.add('input-error');
+        } else if (!emailRegex.test(emailInput.value.trim())) {
+          showError(3, "صيغة البريد الإلكتروني غير صحيحة"); valid = false; emailInput.classList.add('input-error');
+        } else { clearError(3, phoneInput); clearError(3, emailInput); }
+      }
+      return valid;
+    };
+    
+    const startTimer = (duration, display) => {
+      let timer = duration;
+      timerInterval = setInterval(() => {
+        let minutes = parseInt(timer / 60, 10).toString().padStart(2, '0');
+        let seconds = parseInt(timer % 60, 10).toString().padStart(2, '0');
+        display.textContent = `${minutes}:${seconds}`;
         if (--timer < 0) {
           clearInterval(timerInterval);
-          alert("انتهى الوقت! سيتم إرسال إجابتك الآن.");
-          document.getElementById("answer").disabled = true;
-          submitExam();
+          answerInput.disabled = true;
+          form.querySelector('.step[data-step="4"] button').click();
         }
       }, 1000);
-    }
+    };
 
-    function updateProgress(step) {
-      const progress = document.getElementById('progress');
-      const percent = step * 25;
-      progress.style.width = percent + '%';
-    }
-
-    function showStep(step) {
-      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
-      document.getElementById("step" + step).classList.add("active");
-      updateProgress(step);
-
-      if (step === 4) {
-        const sevenMinutes = 7 * 60;
-        const display = document.querySelector('#timer');
-        startTimer(sevenMinutes, display);
-      }
-    }
-
-    function validateStep(current, next) {
-      let valid = true;
-      const errorDiv = document.getElementById("err" + current);
-      if (errorDiv) errorDiv.innerHTML = "";
-
-      if (current === 1) {
-        const name = document.getElementById("name").value.trim();
-        const arabicRegex = /^[\u0600-\u06FF\s]+$/;
-        if (name === "") {
-          document.getElementById("err1").innerHTML = "الاسم مطلوب";
-          valid = false;
-        } else if (!arabicRegex.test(name)) {
-          document.getElementById("err1").innerHTML = "الرجاء إدخال الاسم باللغة العربية فقط";
-          valid = false;
+    const submitExam = async (submitButton) => {
+        clearInterval(timerInterval);
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="loader"></span>';
+        const formData = {
+            name: nameInput.value.trim(),
+            idNumber: idInput.value.trim(),
+            phone: phoneInput.value.trim(),
+            email: emailInput.value.trim(),
+            answer: answerInput.value.trim(),
+            wordCount: wordCountSpan.textContent,
+            submissionTime: serverTimestamp()
+        };
+        try {
+            await addDoc(collection(db, "exams"), formData);
+            examCard.style.display = 'none';
+            successMessage.style.display = 'block';
+        } catch (e) {
+            console.error("Error adding document: ", e);
+            alert("❌ حدث خطأ أثناء الإرسال. الرجاء المحاولة مرة أخرى.");
+            submitButton.disabled = false;
+            submitButton.textContent = "إرسال الإجابة";
+        }
+    };
+    
+    // --- Event Listeners ---
+    form.addEventListener('click', (e) => {
+      if (e.target.matches('button[data-next]')) {
+        const currentStep = parseInt(e.target.closest('.step').dataset.step);
+        const nextStep = parseInt(e.target.dataset.next);
+        if (validateStep(currentStep)) {
+          showStep(nextStep);
         }
       }
-      
-      if (current === 2) {
-        const idNumber = document.getElementById("idNumber").value.trim();
-        const numberRegex = /^\d{10}$/;
-        if (idNumber === "") {
-          document.getElementById("err2").innerHTML = "رقم الهوية مطلوب";
-          valid = false;
-        } else if (!numberRegex.test(idNumber)) {
-          document.getElementById("err2").innerHTML = "يجب أن يتكون رقم الهوية من 10 أرقام";
-          valid = false;
-        }
-      }
-
-      if (current === 3) {
-        const phone = document.getElementById("phone").value.trim();
-        const email = document.getElementById("email").value.trim();
-        if (phone === "" || email === "") {
-          document.getElementById("err3").innerHTML = "أدخل جميع البيانات";
-          valid = false;
-        }
-      }
-
-      if (valid) {
-        const currentButton = document.querySelector(`#step${current} button`);
-        currentButton.disabled = true;
-        currentButton.innerHTML = '<span class="loader"></span>';
-
-        setTimeout(() => {
-          if (current === 1) formData.name = document.getElementById("name").value.trim();
-          if (current === 2) formData.idNumber = document.getElementById("idNumber").value.trim();
-          if (current === 3) {
-            formData.phone = document.getElementById("phone").value.trim();
-            formData.email = document.getElementById("email").value.trim();
-          }
-          showStep(next);
-        }, 800);
-      }
-    }
-
-    document.getElementById("answer").addEventListener("input", function() {
-      const words = this.value.trim().split(/\s+/).filter(w => w.length > 0);
-      document.getElementById("wordCount").textContent = words.length;
     });
 
-    async function submitExam() {
-      clearInterval(timerInterval); // Stop the timer if user submits manually
-      formData.answer = document.getElementById("answer").value;
-      formData.wordCount = document.getElementById("wordCount").textContent;
-      formData.timestamp = new Date().toISOString();
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitExam(e.target.querySelector('button[type="submit"]'));
+    });
 
-      const submitButton = document.querySelector("#step4 button");
-      submitButton.disabled = true;
-      submitButton.innerHTML = '<span class="loader"></span>';
+    // --- NEW: Rate Limiting Logic for the textarea ---
+    let lastValidAnswer = answerInput.value;
+    let lastInputTime = Date.now();
+    let charCountThisSecond = 0;
+    const RATE_LIMIT = 15; // Max 15 chars per second
 
-      try {
-        await addDoc(collection(db, "exams"), formData);
-        alert("✅ تم إرسال الإجابة بنجاح");
-        location.reload();
-      } catch (e) {
-        alert("❌ خطأ أثناء الإرسال. الرجاء المحاولة مرة أخرى.");
-        console.error("Error adding document: ", e);
-        submitButton.disabled = false;
-        submitButton.textContent = "إرسال الإجابة";
-      }
-    }
+    answerInput.addEventListener("input", () => {
+        const currentTime = Date.now();
+        const timeDiff = currentTime - lastInputTime;
+        const currentValue = answerInput.value;
+        const charsAdded = currentValue.length - lastValidAnswer.length;
 
-    document.addEventListener('copy', e => e.preventDefault());
+        // Ignore if user is deleting text
+        if (charsAdded <= 0) {
+            lastValidAnswer = currentValue;
+        } else {
+            // If more than a second has passed, reset the counter
+            if (timeDiff > 1000) {
+                charCountThisSecond = 0;
+                lastInputTime = currentTime;
+            }
+
+            charCountThisSecond += charsAdded;
+
+            if (charCountThisSecond > RATE_LIMIT) {
+                // Revert to the last valid text
+                answerInput.value = lastValidAnswer;
+                
+                // Show a temporary warning
+                rateLimitWarning.textContent = 'تم تجاوز حد السرعة في الكتابة!';
+                setTimeout(() => { rateLimitWarning.textContent = ''; }, 2000);
+            } else {
+                lastValidAnswer = currentValue;
+            }
+        }
+        
+        // Update word count regardless of rate limit
+        const words = answerInput.value.trim().split(/\s+/).filter(w => w.length > 0);
+        wordCountSpan.textContent = words.length;
+    });
+
+    // Disable copy-paste on the entire document (can be bypassed, but is a deterrent)
     document.addEventListener('paste', e => e.preventDefault());
     
-    document.querySelector("#step1 button").addEventListener("click", () => validateStep(1, 2));
-    document.querySelector("#step2 button").addEventListener("click", () => validateStep(2, 3));
-    document.querySelector("#step3 button").addEventListener("click", () => validateStep(3, 4));
-    document.querySelector("#step4 button").addEventListener("click", submitExam);
-    
-    updateProgress(1);
+    // Initialize
+    showStep(1);
   </script>
 </body>
 </html>
