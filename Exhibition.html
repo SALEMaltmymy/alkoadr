@@ -7,188 +7,207 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand: #1e88e5;
-      --brand-dark: #1565c0;
-      --bg: #f4f7f9;
-      --card-bg: #ffffff;
+      --brand: #1e88e5; --brand-dark: #1565c0;
+      --bg: #f4f7f9; --card-bg: #ffffff;
       --shadow: 0 8px 25px rgba(0,0,0,.08);
-      --ink: #0f172a;
-      --muted: #6b7280;
+      --ink: #0f172a; --muted: #6b7280;
       --border-color: #e5e7eb;
-      --danger: #ef4444;
-      --danger-dark: #dc2626;
+      --danger: #ef4444; --danger-dark: #dc2626;
+      --success: #22c55e;
     }
     body {
-      margin: 0;
-      font-family: "Tajawal", sans-serif;
-      background-color: var(--bg);
-      color: var(--ink);
+      margin: 0; font-family: "Tajawal", sans-serif;
+      background-color: var(--bg); color: var(--ink);
     }
     .container {
-      width: min(900px, 92%);
-      margin: auto;
-      padding: 20px 0;
+      width: min(900px, 92%); margin: auto; padding: 20px 0;
     }
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 25px;
-      background: var(--card-bg);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 25px; background: var(--card-bg);
+      border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 30px;
     }
-    .header .brand {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
+    .header .brand { display: flex; align-items: center; gap: 15px; }
     .header .brand img { height: 50px; }
     .header .brand h1 { margin: 0; font-size: 22px; color: var(--brand-dark); }
-    
-    .header-actions {
-        display: flex;
-        gap: 10px;
-    }
+    .header-actions { display: flex; gap: 10px; }
     .back-btn, .delete-btn {
-        text-decoration: none;
-        padding: 10px 20px;
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 14px;
+      text-decoration: none; padding: 10px 20px; border-radius: 12px;
+      font-weight: 500; transition: all 0.2s ease;
+      border: none; cursor: pointer; font-family: inherit; font-size: 14px;
     }
     .back-btn {
-        background-color: var(--bg);
-        color: var(--ink);
-        border: 1px solid var(--border-color);
+      background-color: var(--bg); color: var(--ink);
+      border: 1px solid var(--border-color);
     }
     .back-btn:hover { background-color: #e2e8f0; border-color: #cbd5e1; }
-
-    .delete-btn {
-        background-color: var(--danger);
-        color: white;
-    }
+    .delete-btn { background-color: var(--danger); color: white; }
     .delete-btn:hover { background-color: var(--danger-dark); }
     .delete-btn:disabled { background-color: #fca5a5; cursor: not-allowed; }
     
     #loader, #error-message {
-        text-align: center; font-size: 18px; color: var(--muted);
-        padding: 60px 20px; background: var(--card-bg);
-        border-radius: 18px; box-shadow: var(--shadow);
+      text-align: center; font-size: 18px; color: var(--muted);
+      padding: 60px 20px; background: var(--card-bg);
+      border-radius: 18px; box-shadow: var(--shadow);
     }
-
     .details-card {
-        background: var(--card-bg); border-radius: 18px;
-        box-shadow: var(--shadow); overflow: hidden;
-        animation: fade-up 0.6s ease;
+      background: var(--card-bg); border-radius: 18px;
+      box-shadow: var(--shadow); overflow: hidden;
+      animation: fade-up 0.6s ease;
     }
     @keyframes fade-up {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    
     .student-info { padding: 30px; border-bottom: 1px solid var(--border-color); }
     .student-info h2 {
-        font-size: 24px; color: var(--brand-dark); margin-top: 0;
-        margin-bottom: 25px; padding-bottom: 15px;
-        border-bottom: 1px solid var(--border-color);
+      font-size: 24px; color: var(--brand-dark); margin-top: 0;
+      margin-bottom: 25px; padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
     }
     .info-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
     }
     .info-item { display: flex; flex-direction: column; }
     .info-item dt { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
     .info-item dd {
-        margin: 0; font-size: 16px; font-weight: 500;
-        background: var(--bg); padding: 10px; border-radius: 8px;
+      margin: 0; font-size: 16px; font-weight: 500;
+      background: var(--bg); padding: 10px; border-radius: 8px;
     }
-
     .exam-answer { padding: 30px; }
     .exam-answer h3 { margin-top: 0; font-size: 20px; }
     .exam-answer .answer-text {
-        background: var(--bg); padding: 20px; border-radius: 12px;
-        line-height: 1.8; font-size: 16px;
-        white-space: pre-wrap;
-        border: 1px solid var(--border-color);
-        max-height: 400px; overflow-y: auto;
+      background: var(--bg); padding: 20px; border-radius: 12px;
+      line-height: 1.8; font-size: 16px; white-space: pre-wrap;
+      border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto;
     }
+
+    /* --- NEW: Custom Modal Styles --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+      backdrop-filter: blur(5px); animation: fadeIn 0.3s ease;
+    }
+    .modal-box {
+      background: white; padding: 30px; border-radius: 16px;
+      width: min(400px, 90%); text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      animation: slideUp 0.4s ease;
+    }
+    .modal-box h3 { margin-top: 0; font-size: 22px; }
+    .modal-box p { color: var(--muted); margin-bottom: 25px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; }
+    .modal-actions button {
+      padding: 10px 20px; border-radius: 10px; font-weight: bold;
+      border: none; cursor: pointer; font-family: inherit; font-size: 15px;
+      flex-grow: 1;
+    }
+    #confirm-delete-btn { background-color: var(--danger); color: white; }
+    #cancel-delete-btn { background-color: var(--border-color); color: var(--ink); }
+
+    /* --- NEW: Toast Notification Styles --- */
+    #toast-container {
+      position: fixed; bottom: 20px; left: 20px; z-index: 2000;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      padding: 15px 25px; border-radius: 12px; color: white;
+      font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      opacity: 0; transform: translateY(20px);
+      transition: all 0.4s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background-color: var(--success); }
+    .toast.error { background-color: var(--danger); }
+    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header class="header">
-      <div class="brand">
-        <img src="tbok.png" alt="شعار جامعة تبوك">
-        <h1>تفاصيل الإجابة</h1>
-      </div>
+      <div class="brand"><img src="tbok.png" alt="شعار جامعة تبوك"><h1>تفاصيل الإجابة</h1></div>
       <div class="header-actions">
-          <a href="admin.html" class="back-btn">→ العودة للوحة التحكم</a>
-          <button id="delete-btn" class="delete-btn">حذف الإجابة</button>
+        <a href="admin.html" class="back-btn">→ العودة للوحة التحكم</a>
+        <button id="delete-btn" class="delete-btn">حذف الإجابة</button>
       </div>
     </header>
-    
-    <div id="loader">
-      <p>جاري تحميل تفاصيل الإجابة...</p>
-    </div>
-    
-    <div id="error-message" style="display: none;">
-      <p>عذراً، لم يتم العثور على هذه الإجابة. قد يكون الرابط غير صحيح.</p>
-    </div>
-
+    <div id="loader"><p>جاري تحميل تفاصيل الإجابة...</p></div>
+    <div id="error-message" style="display: none;"><p>عذراً، لم يتم العثور على هذه الإجابة.</p></div>
     <div id="content" style="display: none;">
       <div class="details-card">
-        
         <div class="student-info">
           <h2>بيانات الطالب</h2>
-          <div class="info-grid">
+          <dl class="info-grid">
             <div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div>
             <div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div>
             <div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div>
             <div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div>
             <div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div>
             <div class="info-item"><dt>عدد الكلمات المكتوبة</dt><dd id="submission-wordcount"></dd></div>
-          </div>
+          </dl>
         </div>
-        
         <div class="exam-answer">
           <h3>نص إجابة الاختبار</h3>
           <div class="answer-text" id="submission-answer"></div>
         </div>
-
       </div>
     </div>
   </div>
+
+  <div id="delete-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>تأكيد الحذف</h3>
+        <p>هل أنت متأكد من رغبتك في حذف هذه الإجابة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <div class="modal-actions">
+            <button id="cancel-delete-btn">إلغاء</button>
+            <button id="confirm-delete-btn">نعم، قم بالحذف</button>
+        </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
-      authDomain: "database-506.firebaseapp.com",
-      projectId: "database-506",
-      storageBucket: "database-506.firebasestorage.app",
-      messagingSenderId: "926446561022",
-      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
-    };
-
+    // --- Firebase Config and Initialization ---
+    const firebaseConfig = { /* ... your config ... */ };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    let currentDocId = null; // متغير لحفظ معرّف المستند الحالي
+    // --- Global Variables & DOM Elements ---
+    let currentDocId = null;
+    const loader = document.getElementById('loader');
+    const content = document.getElementById('content');
+    const errorMessage = document.getElementById('error-message');
+    const deleteBtn = document.getElementById('delete-btn');
+    const deleteModal = document.getElementById('delete-modal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
+    // --- NEW: Toast Notification Function ---
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10); // Show toast
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 4000); // Hide after 4 seconds
+    }
+    
+    // --- Data Fetching Function ---
     async function fetchSubmissionDetails(docId) {
-        const loader = document.getElementById('loader');
-        const content = document.getElementById('content');
-        const errorMessage = document.getElementById('error-message');
-
         try {
             const docRef = doc(db, "exams", docId);
             const docSnap = await getDoc(docRef);
@@ -201,17 +220,20 @@
                 document.getElementById('student-email').textContent = data.email || 'غير متوفر';
                 document.getElementById('submission-wordcount').textContent = data.wordCount || '0';
                 
-                const submissionDate = new Date(data.timestamp);
-                document.getElementById('submission-timestamp').textContent = submissionDate.toLocaleString('ar-SA', {
-                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
+                // ✅ FIX: Using 'submissionTime' field and .toDate() method
+                if (data.submissionTime && data.submissionTime.toDate) {
+                    document.getElementById('submission-timestamp').textContent = data.submissionTime.toDate().toLocaleString('ar-SA', {
+                        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+                } else {
+                    document.getElementById('submission-timestamp').textContent = 'غير متوفر';
+                }
 
                 document.getElementById('submission-answer').textContent = data.answer || 'لم يتم تقديم إجابة.';
                 loader.style.display = 'none';
                 content.style.display = 'block';
             } else {
-                loader.style.display = 'none';
-                errorMessage.style.display = 'block';
+                loader.style.display = 'none'; errorMessage.style.display = 'block';
             }
         } catch (error) {
             console.error("Error fetching document:", error);
@@ -221,36 +243,29 @@
         }
     }
 
-    // --- وظيفة الحذف الجديدة ---
-    async function handleDelete() {
+    // --- IMPROVED: Delete Logic ---
+    async function executeDelete() {
         if (!currentDocId) return;
 
-        // طلب التأكيد من المستخدم قبل الحذف
-        const isConfirmed = confirm("هل أنت متأكد من رغبتك في حذف هذه الإجابة؟ لا يمكن التراجع عن هذا الإجراء.");
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'جاري الحذف...';
 
-        if (isConfirmed) {
-            const deleteBtn = document.getElementById('delete-btn');
-            deleteBtn.disabled = true;
-            deleteBtn.textContent = 'جاري الحذف...';
+        try {
+            await deleteDoc(doc(db, "exams", currentDocId));
+            showToast('✅ تم حذف الإجابة بنجاح.', 'success');
+            
+            // Redirect after a short delay to allow user to see the toast
+            setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
 
-            try {
-                const docRef = doc(db, "exams", currentDocId);
-                await deleteDoc(docRef);
-                
-                alert('✅ تم حذف الإجابة بنجاح.');
-                // إعادة توجيه المستخدم إلى صفحة المشرف
-                window.location.href = 'admin.html';
-
-            } catch (error) {
-                console.error("Error deleting document:", error);
-                alert('❌ حدث خطأ أثناء الحذف. الرجاء المحاولة مرة أخرى.');
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = 'حذف الإجابة';
-            }
+        } catch (error) {
+            console.error("Error deleting document:", error);
+            showToast('❌ حدث خطأ أثناء الحذف.', 'error');
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'حذف الإجابة';
         }
     }
 
-    // --- الكود الرئيسي الذي يعمل عند فتح الصفحة ---
+    // --- Page Load & Event Listeners ---
     window.onload = () => {
         const urlParams = new URLSearchParams(window.location.search);
         currentDocId = urlParams.get('id');
@@ -258,12 +273,25 @@
         if (currentDocId) {
             fetchSubmissionDetails(currentDocId);
         } else {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('error-message').style.display = 'block';
+            loader.style.display = 'none';
+            errorMessage.style.display = 'block';
         }
 
-        // ربط وظيفة الحذف بالزر
-        document.getElementById('delete-btn').addEventListener('click', handleDelete);
+        // Show confirmation modal instead of native confirm
+        deleteBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'flex';
+        });
+
+        // Hide modal on cancel
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+        });
+
+        // Execute delete on confirm
+        confirmDeleteBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+            executeDelete();
+        });
     };
   </script>
 
