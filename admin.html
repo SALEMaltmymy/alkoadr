@@ -28,103 +28,64 @@
     }
     /* --- شاشة تسجيل الدخول --- */
     #login-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
+      display: none;
+      justify-content: center; align-items: center; z-index: 100;
       backdrop-filter: blur(5px);
     }
     .login-box {
-      background: var(--card-bg);
-      padding: 40px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 10px 40px rgba(0,0,0,.2);
+      background: var(--card-bg); padding: 40px; border-radius: 20px;
+      text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.2);
       animation: fade-in 0.5s ease;
     }
     @keyframes fade-in {
       from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
     }
-    .login-box h2 {
-      margin-top: 0;
-      color: var(--brand-dark);
-    }
+    .login-box h2 { margin-top: 0; color: var(--brand-dark); }
     .login-box input {
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      width: 100%;
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 16px;
+      padding: 12px; border-radius: 12px; border: 1px solid #ccc;
+      width: 100%; margin-bottom: 10px; text-align: center; font-size: 16px;
     }
     .login-box button {
-      padding: 12px 20px;
-      border: none;
-      background: var(--brand);
-      color: white;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
+      padding: 12px 20px; border: none; background: var(--brand);
+      color: white; border-radius: 12px; cursor: pointer;
+      font-size: 16px; font-weight: bold;
     }
-    .login-box .error {
-      color: #d32f2f;
-      min-height: 20px;
-      font-size: 14px;
-    }
+    .login-box .error { color: #d32f2f; min-height: 20px; font-size: 14px; }
 
     /* --- محتوى صفحة الأدمن --- */
-    #admin-content {
-      display: none; /* مخفي بشكل افتراضي */
-    }
+    #admin-content { display: none; }
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 25px;
-      background: var(--card-bg);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 25px; background: var(--card-bg);
+      border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 30px;
     }
-    .header img {
-      height: 50px;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 24px;
-      color: var(--brand-dark);
-    }
+    .header img { height: 50px; }
+    .header h1 { margin: 0; font-size: 24px; color: var(--brand-dark); }
     
     #loading-indicator, #empty-state {
-        text-align: center;
-        font-size: 18px;
-        color: var(--muted);
-        padding: 50px;
+        text-align: center; font-size: 18px; color: var(--muted); padding: 50px;
     }
 
+    /* --- تصميم الشبكة الجديد --- */
     .submissions-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 25px;
     }
     .submission-card {
-      background: var(--card-bg);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 20px;
-      text-align: center;
+      background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow);
+      padding: 25px; text-align: center;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       animation: fade-up 0.6s ease forwards;
       opacity: 0;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    /* لإخفاء البطاقات الزائدة */
+    .submission-card.is-hidden {
+        display: none;
     }
     .submission-card:hover {
         transform: translateY(-8px);
@@ -135,36 +96,44 @@
         to { opacity: 1; transform: translateY(0); }
     }
     .submission-card img.user-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid var(--bg);
-      margin-bottom: 15px;
+      width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+      border: 4px solid var(--bg); margin-bottom: 15px; align-self: center;
     }
-    .submission-card h3 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .submission-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      margin-bottom: 20px;
-    }
+    .submission-card h3 { margin: 0 0 8px 0; font-size: 18px; font-weight: 700; }
+    .submission-card p { margin: 0; color: var(--muted); font-size: 15px; margin-bottom: 20px; }
     .submission-card .view-btn {
-      display: inline-block;
-      text-decoration: none;
-      background-color: var(--brand);
-      color: white;
-      padding: 10px 25px;
-      border-radius: 12px;
-      font-weight: 500;
-      transition: background-color 0.2s ease;
+      display: inline-block; text-decoration: none; background-color: var(--brand);
+      color: white; padding: 10px 25px; border-radius: 12px;
+      font-weight: 500; transition: background-color 0.2s ease;
     }
-    .submission-card .view-btn:hover {
-      background-color: var(--brand-dark);
+    .submission-card .view-btn:hover { background-color: var(--brand-dark); }
+
+    /* --- زر عرض المزيد --- */
+    .show-more-container {
+        text-align: center;
+        padding: 30px 0;
+    }
+    #show-more-btn {
+        background-color: var(--brand-dark);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    #show-more-btn:hover {
+        background-color: var(--ink);
+    }
+    
+    /* --- التجاوب مع الشاشات --- */
+    @media (max-width: 992px) {
+      .submissions-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .submissions-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -189,48 +158,62 @@
     <div id="loading-indicator">
         <p>جاري تحميل البيانات...</p>
     </div>
-
     <div id="empty-state" style="display: none;">
         <p>لا توجد إجابات مقدمة حتى الآن.</p>
     </div>
     
-    <div class="submissions-grid" id="submissions-grid">
-      </div>
+    <div class="submissions-grid" id="submissions-grid"></div>
+    
+    <div class="show-more-container" id="show-more-container" style="display: none;">
+      <button id="show-more-btn">عرض المزيد</button>
+    </div>
   </div>
 
   <script type="module">
-    // --- الجزء الخاص بتسجيل الدخول ---
+    // --- الجزء الخاص بتسجيل الدخول المؤقت ---
     const loginOverlay = document.getElementById('login-overlay');
     const adminContent = document.getElementById('admin-content');
     const passwordInput = document.getElementById('password-input');
     const loginBtn = document.getElementById('login-btn');
     const errorMessage = document.getElementById('error-message');
+    
     const correctPassword = "KHLEDADMIN";
+    const sessionTimeout = 15 * 60 * 1000; // 15 دقيقة
 
     function handleLogin() {
-        if (passwordInput.value === correctPassword) {
-            loginOverlay.style.display = 'none';
-            adminContent.style.display = 'block';
-            // عند الدخول بنجاح، قم بجلب البيانات
-            fetchSubmissions();
-        } else {
-            errorMessage.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
+      if (passwordInput.value === correctPassword) {
+        localStorage.setItem('loginTimestamp', Date.now());
+        checkLoginSession();
+      } else {
+        errorMessage.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
+      }
+    }
+
+    function checkLoginSession() {
+      const loginTimestamp = localStorage.getItem('loginTimestamp');
+      
+      if (loginTimestamp && (Date.now() - loginTimestamp < sessionTimeout)) {
+        loginOverlay.style.display = 'none';
+        adminContent.style.display = 'block';
+        if (document.getElementById('submissions-grid').childElementCount === 0) {
+          fetchSubmissions();
         }
+      } else {
+        loginOverlay.style.display = 'flex';
+        adminContent.style.display = 'none';
+        localStorage.removeItem('loginTimestamp');
+      }
     }
 
     loginBtn.addEventListener('click', handleLogin);
-    passwordInput.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            handleLogin();
-        }
+    passwordInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') handleLogin();
     });
-
 
     // --- الجزء الخاص بـ Firebase وجلب البيانات ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // استخدم نفس إعدادات المشروع
     const firebaseConfig = {
       apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
       authDomain: "database-506.firebaseapp.com",
@@ -244,42 +227,73 @@
     const db = getFirestore(app);
 
     async function fetchSubmissions() {
-        const grid = document.getElementById('submissions-grid');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const emptyState = document.getElementById('empty-state');
+      const grid = document.getElementById('submissions-grid');
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const emptyState = document.getElementById('empty-state');
+      const showMoreContainer = document.getElementById('show-more-container');
         
-        try {
-            // جلب البيانات مع ترتيبها حسب الأحدث أولاً
-            const q = query(collection(db, "exams"), orderBy("timestamp", "desc"));
-            const querySnapshot = await getDocs(q);
+      try {
+        // الفرز حسب التاريخ، الأحدث أولاً (تم تطبيقه مسبقاً)
+        const q = query(collection(db, "exams"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
 
-            loadingIndicator.style.display = 'none'; // إخفاء مؤشر التحميل
+        loadingIndicator.style.display = 'none';
 
-            if (querySnapshot.empty) {
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            let cardDelay = 0;
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const cardHTML = `
-                    <div class="submission-card" style="animation-delay: ${cardDelay}s">
-                        <img src="user.png" alt="صورة الطالب" class="user-avatar">
-                        <h3>${data.name || 'اسم غير متوفر'}</h3>
-                        <p>رقم الهوية: ${data.idNumber || 'غير متوفر'}</p>
-                        <a href="Exhibition.html?id=${doc.id}" class="view-btn">عرض التفاصيل</a>
-                    </div>
-                `;
-                grid.innerHTML += cardHTML;
-                cardDelay += 0.05; // لظهور البطاقات بشكل متتالي
-            });
-
-        } catch (error) {
-            loadingIndicator.innerHTML = '<p style="color: red;">حدث خطأ أثناء جلب البيانات. تأكد من اتصالك بالإنترنت وقواعد الأمان في Firebase.</p>';
-            console.error("Error fetching documents: ", error);
+        if (querySnapshot.empty) {
+            emptyState.style.display = 'block';
+            return;
         }
+
+        let cardCount = 0;
+        const visibleLimit = 12;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const card = document.createElement('div');
+          card.className = 'submission-card';
+          
+          // إخفاء البطاقات التي تتجاوز الحد المسموح به
+          if (cardCount >= visibleLimit) {
+              card.classList.add('is-hidden');
+          }
+
+          card.style.animationDelay = `${(cardCount % visibleLimit) * 0.05}s`;
+          
+          card.innerHTML = `
+            <div>
+              <img src="user.png" alt="صورة الطالب" class="user-avatar">
+              <h3>${data.name || 'اسم غير متوفر'}</h3>
+              <p>رقم الهوية: ${data.idNumber || 'غير متوفر'}</p>
+            </div>
+            <a href="Exhibition.html?id=${doc.id}" class="view-btn">عرض التفاصيل</a>
+          `;
+          grid.appendChild(card);
+  
+          cardCount++;
+        });
+        
+        // إظهار زر "عرض المزيد" فقط إذا كان عدد الإجابات أكبر من الحد المسموح به
+        if (querySnapshot.size > visibleLimit) {
+            showMoreContainer.style.display = 'block';
+        }
+
+      } catch (error) {
+        loadingIndicator.innerHTML = '<p style="color: red;">حدث خطأ أثناء جلب البيانات. تأكد من اتصالك بالإنترنت وقواعد الأمان في Firebase.</p>';
+        console.error("Error fetching documents: ", error);
+      }
     }
+    
+    // إضافة وظيفة لزر "عرض المزيد"
+    const showMoreBtn = document.getElementById('show-more-btn');
+    showMoreBtn.addEventListener('click', () => {
+        document.querySelectorAll('.submission-card.is-hidden').forEach(card => {
+            card.classList.remove('is-hidden');
+        });
+        showMoreBtn.parentElement.style.display = 'none'; // إخفاء الزر بعد الضغط عليه
+    });
+    
+    // عند تحميل الصفحة، تحقق من جلسة الدخول أولاً
+    checkLoginSession();
   </script>
 
 </body>
