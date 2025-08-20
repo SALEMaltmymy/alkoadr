@@ -14,6 +14,7 @@
       --shadow: 0 8px 25px rgba(0,0,0,.08);
       --ink: #0f172a;
       --muted: #6b7280;
+      --border-color: #e5e7eb;
     }
     body {
       margin: 0;
@@ -29,15 +30,16 @@
     /* --- شاشة تسجيل الدخول --- */
     #login-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(255, 255, 255, 0.7);
       display: none;
       justify-content: center; align-items: center; z-index: 100;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(8px);
     }
     .login-box {
       background: var(--card-bg); padding: 40px; border-radius: 20px;
       text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.2);
       animation: fade-in 0.5s ease;
+      width: min(350px, 90%);
     }
     @keyframes fade-in {
       from { opacity: 0; transform: scale(0.9); }
@@ -47,11 +49,12 @@
     .login-box input {
       padding: 12px; border-radius: 12px; border: 1px solid #ccc;
       width: 100%; margin-bottom: 10px; text-align: center; font-size: 16px;
+      box-sizing: border-box;
     }
     .login-box button {
       padding: 12px 20px; border: none; background: var(--brand);
       color: white; border-radius: 12px; cursor: pointer;
-      font-size: 16px; font-weight: bold;
+      font-size: 16px; font-weight: bold; width: 100%;
     }
     .login-box .error { color: #d32f2f; min-height: 20px; font-size: 14px; }
 
@@ -69,71 +72,69 @@
         text-align: center; font-size: 18px; color: var(--muted); padding: 50px;
     }
 
-    /* --- تصميم الشبكة الجديد --- */
+    /* --- تصميم الشبكة المحسن --- */
     .submissions-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 25px;
     }
     .submission-card {
       background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow);
-      padding: 25px; text-align: center;
+      display: flex; flex-direction: column;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       animation: fade-up 0.6s ease forwards;
       opacity: 0;
-      display: flex; flex-direction: column; justify-content: space-between;
-    }
-    /* لإخفاء البطاقات الزائدة */
-    .submission-card.is-hidden {
-        display: none;
     }
     .submission-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 35px rgba(0,0,0,.12);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0,0,0,.12);
+    }
+    .card-content {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .card-footer {
+        padding: 15px 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fafafa;
+        border-bottom-left-radius: 18px;
+        border-bottom-right-radius: 18px;
     }
     @keyframes fade-up {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .submission-card img.user-avatar {
-      width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
-      border: 4px solid var(--bg); margin-bottom: 15px; align-self: center;
+    .user-avatar {
+      width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+      flex-shrink: 0;
     }
-    .submission-card h3 { margin: 0 0 8px 0; font-size: 18px; font-weight: 700; }
-    .submission-card p { margin: 0; color: var(--muted); font-size: 15px; margin-bottom: 20px; }
-    .submission-card .view-btn {
-      display: inline-block; text-decoration: none; background-color: var(--brand);
-      color: white; padding: 10px 25px; border-radius: 12px;
-      font-weight: 500; transition: background-color 0.2s ease;
+    .user-info { text-align: right; flex-grow: 1; }
+    .user-info h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--ink); }
+    .user-info p { margin: 0; color: var(--muted); font-size: 15px; }
+    .submission-date {
+        font-size: 13px; color: var(--muted);
     }
-    .submission-card .view-btn:hover { background-color: var(--brand-dark); }
+    .view-btn {
+      text-decoration: none; background-color: var(--brand);
+      color: white; padding: 8px 20px; border-radius: 10px;
+      font-weight: 500; font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+    .view-btn:hover { background-color: var(--brand-dark); }
 
-    /* --- زر عرض المزيد --- */
-    .show-more-container {
-        text-align: center;
-        padding: 30px 0;
-    }
-    #show-more-btn {
-        background-color: var(--brand-dark);
-        color: white;
-        padding: 12px 30px;
-        border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-    #show-more-btn:hover {
-        background-color: var(--ink);
-    }
+    .submission-card.is-hidden { display: none; }
     
-    /* --- التجاوب مع الشاشات --- */
-    @media (max-width: 992px) {
-      .submissions-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      .submissions-grid { grid-template-columns: 1fr; }
+    .show-more-container { text-align: center; padding: 30px 0; }
+    #show-more-btn {
+        background-color: var(--brand-dark); color: white;
+        padding: 12px 30px; border: none; border-radius: 12px;
+        font-size: 16px; font-weight: bold; cursor: pointer;
+        transition: background-color 0.2s ease;
     }
   </style>
 </head>
@@ -155,12 +156,8 @@
       <img src="tbok.png" alt="شعار جامعة تبوك">
     </header>
 
-    <div id="loading-indicator">
-        <p>جاري تحميل البيانات...</p>
-    </div>
-    <div id="empty-state" style="display: none;">
-        <p>لا توجد إجابات مقدمة حتى الآن.</p>
-    </div>
+    <div id="loading-indicator"><p>جاري تحميل البيانات...</p></div>
+    <div id="empty-state" style="display: none;"><p>لا توجد إجابات مقدمة حتى الآن.</p></div>
     
     <div class="submissions-grid" id="submissions-grid"></div>
     
@@ -176,7 +173,6 @@
     const passwordInput = document.getElementById('password-input');
     const loginBtn = document.getElementById('login-btn');
     const errorMessage = document.getElementById('error-message');
-    
     const correctPassword = "KHLEDADMIN";
     const sessionTimeout = 15 * 60 * 1000; // 15 دقيقة
 
@@ -188,10 +184,8 @@
         errorMessage.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
       }
     }
-
     function checkLoginSession() {
       const loginTimestamp = localStorage.getItem('loginTimestamp');
-      
       if (loginTimestamp && (Date.now() - loginTimestamp < sessionTimeout)) {
         loginOverlay.style.display = 'none';
         adminContent.style.display = 'block';
@@ -204,7 +198,6 @@
         localStorage.removeItem('loginTimestamp');
       }
     }
-
     loginBtn.addEventListener('click', handleLogin);
     passwordInput.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') handleLogin();
@@ -226,6 +219,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    /**
+     * Helper function to format Firestore Timestamp to a readable string.
+     * @param {object} timestamp - The Firestore Timestamp object.
+     * @returns {string} - Formatted date string or an empty string.
+     */
+    function formatTimestamp(timestamp) {
+        if (!timestamp || typeof timestamp.toDate !== 'function') {
+            return 'تاريخ غير متوفر';
+        }
+        return timestamp.toDate().toLocaleString('ar-SA', {
+            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+    }
+
     async function fetchSubmissions() {
       const grid = document.getElementById('submissions-grid');
       const loadingIndicator = document.getElementById('loading-indicator');
@@ -233,8 +240,8 @@
       const showMoreContainer = document.getElementById('show-more-container');
         
       try {
-        // الفرز حسب التاريخ، الأحدث أولاً (تم تطبيقه مسبقاً)
-        const q = query(collection(db, "exams"), orderBy("timestamp", "desc"));
+        // ✅ FIX: Changed orderBy field from "timestamp" to "submissionTime"
+        const q = query(collection(db, "exams"), orderBy("submissionTime", "desc"));
         const querySnapshot = await getDocs(q);
 
         loadingIndicator.style.display = 'none';
@@ -252,27 +259,32 @@
           const card = document.createElement('div');
           card.className = 'submission-card';
           
-          // إخفاء البطاقات التي تتجاوز الحد المسموح به
           if (cardCount >= visibleLimit) {
               card.classList.add('is-hidden');
           }
-
           card.style.animationDelay = `${(cardCount % visibleLimit) * 0.05}s`;
           
+          // ✨ IMPROVEMENT: Dynamic avatar from name and new card structure
+          const name = data.name || 'غير معروف';
+          const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.charAt(0))}&background=random&color=fff&size=60&font-size=0.5`;
+
           card.innerHTML = `
-            <div>
-              <img src="user.png" alt="صورة الطالب" class="user-avatar">
-              <h3>${data.name || 'اسم غير متوفر'}</h3>
-              <p>رقم الهوية: ${data.idNumber || 'غير متوفر'}</p>
+            <div class="card-content">
+                <img src="${avatarUrl}" alt="صورة الطالب" class="user-avatar">
+                <div class="user-info">
+                  <h3>${name}</h3>
+                  <p>رقم الهوية: ${data.idNumber || 'غير متوفر'}</p>
+                </div>
             </div>
-            <a href="Exhibition.html?id=${doc.id}" class="view-btn">عرض التفاصيل</a>
+            <div class="card-footer">
+                <span class="submission-date">${formatTimestamp(data.submissionTime)}</span>
+                <a href="Exhibition.html?id=${doc.id}" class="view-btn">عرض التفاصيل</a>
+            </div>
           `;
           grid.appendChild(card);
-  
           cardCount++;
         });
         
-        // إظهار زر "عرض المزيد" فقط إذا كان عدد الإجابات أكبر من الحد المسموح به
         if (querySnapshot.size > visibleLimit) {
             showMoreContainer.style.display = 'block';
         }
@@ -283,16 +295,15 @@
       }
     }
     
-    // إضافة وظيفة لزر "عرض المزيد"
+    // "Show More" button functionality remains the same
     const showMoreBtn = document.getElementById('show-more-btn');
     showMoreBtn.addEventListener('click', () => {
         document.querySelectorAll('.submission-card.is-hidden').forEach(card => {
             card.classList.remove('is-hidden');
         });
-        showMoreBtn.parentElement.style.display = 'none'; // إخفاء الزر بعد الضغط عليه
+        showMoreBtn.parentElement.style.display = 'none';
     });
     
-    // عند تحميل الصفحة، تحقق من جلسة الدخول أولاً
     checkLoginSession();
   </script>
 
