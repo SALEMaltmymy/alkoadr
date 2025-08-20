@@ -45,11 +45,13 @@
     .delete-btn:hover { background-color: var(--danger-dark); }
     .delete-btn:disabled { background-color: #fca5a5; cursor: not-allowed; }
     
-    #loader, #error-message {
+    .status-card {
       text-align: center; font-size: 18px; color: var(--muted);
       padding: 60px 20px; background: var(--card-bg);
       border-radius: 18px; box-shadow: var(--shadow);
     }
+    .status-card.error { color: var(--danger-dark); }
+    
     .details-card {
       background: var(--card-bg); border-radius: 18px;
       box-shadow: var(--shadow); overflow: hidden;
@@ -82,8 +84,6 @@
       line-height: 1.8; font-size: 16px; white-space: pre-wrap;
       border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto;
     }
-
-    /* --- NEW: Custom Modal Styles --- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.6);
@@ -106,8 +106,6 @@
     }
     #confirm-delete-btn { background-color: var(--danger); color: white; }
     #cancel-delete-btn { background-color: var(--border-color); color: var(--ink); }
-
-    /* --- NEW: Toast Notification Styles --- */
     #toast-container {
       position: fixed; bottom: 20px; left: 20px; z-index: 2000;
       display: flex; flex-direction: column; gap: 10px;
@@ -121,7 +119,6 @@
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.success { background-color: var(--success); }
     .toast.error { background-color: var(--danger); }
-    
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
@@ -133,30 +130,33 @@
       <div class="brand"><img src="tbok.png" alt="شعار جامعة تبوك"><h1>تفاصيل الإجابة</h1></div>
       <div class="header-actions">
         <a href="admin.html" class="back-btn">→ العودة للوحة التحكم</a>
-        <button id="delete-btn" class="delete-btn">حذف الإجابة</button>
+        <button id="delete-btn" class="delete-btn" disabled>حذف الإجابة</button>
       </div>
     </header>
-    <div id="loader"><p>جاري تحميل تفاصيل الإجابة...</p></div>
-    <div id="error-message" style="display: none;"><p>عذراً، لم يتم العثور على هذه الإجابة.</p></div>
-    <div id="content" style="display: none;">
-      <div class="details-card">
-        <div class="student-info">
-          <h2>بيانات الطالب</h2>
-          <dl class="info-grid">
-            <div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div>
-            <div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div>
-            <div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div>
-            <div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div>
-            <div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div>
-            <div class="info-item"><dt>عدد الكلمات المكتوبة</dt><dd id="submission-wordcount"></dd></div>
-          </dl>
+    
+    <main id="page-wrapper">
+        <div id="loader" class="status-card"><p>جاري تحميل تفاصيل الإجابة...</p></div>
+        <div id="error-card" class="status-card error" style="display: none;"><p>حدث خطأ ما.</p></div>
+        <div id="content" style="display: none;">
+          <div class="details-card">
+            <div class="student-info">
+              <h2>بيانات الطالب</h2>
+              <dl class="info-grid">
+                <div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div>
+                <div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div>
+                <div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div>
+                <div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div>
+                <div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div>
+                <div class="info-item"><dt>عدد الكلمات المكتوبة</dt><dd id="submission-wordcount"></dd></div>
+              </dl>
+            </div>
+            <div class="exam-answer">
+              <h3>نص إجابة الاختبار</h3>
+              <div class="answer-text" id="submission-answer"></div>
+            </div>
+          </div>
         </div>
-        <div class="exam-answer">
-          <h3>نص إجابة الاختبار</h3>
-          <div class="answer-text" id="submission-answer"></div>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 
   <div id="delete-modal" class="modal-overlay">
@@ -177,7 +177,7 @@
     import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // --- Firebase Config and Initialization ---
-    const firebaseConfig = { /* ... your config ... */ };
+    const firebaseConfig = { /* ... ضع إعدادات Firebase الخاصة بك هنا ... */ };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
@@ -185,42 +185,63 @@
     let currentDocId = null;
     const loader = document.getElementById('loader');
     const content = document.getElementById('content');
-    const errorMessage = document.getElementById('error-message');
+    const errorCard = document.getElementById('error-card');
+    const errorCardText = errorCard.querySelector('p');
     const deleteBtn = document.getElementById('delete-btn');
     const deleteModal = document.getElementById('delete-modal');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-    // --- NEW: Toast Notification Function ---
+    // --- 1. State Management Function ---
+    // هذه الوظيفة مسؤولة عن عرض الواجهة المناسبة (تحميل، خطأ، أو المحتوى)
+    function displayState(state, message = '') {
+        loader.style.display = 'none';
+        content.style.display = 'none';
+        errorCard.style.display = 'none';
+
+        if (state === 'loading') {
+            loader.style.display = 'block';
+        } else if (state === 'error') {
+            errorCardText.textContent = message;
+            errorCard.style.display = 'block';
+        } else if (state === 'success') {
+            content.style.display = 'block';
+            deleteBtn.disabled = false; // تفعيل زر الحذف بعد تحميل البيانات بنجاح
+        }
+    }
+
+    // --- 2. Toast Notification Function ---
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
+        toast.className = `toast ${type}`; toast.textContent = message;
         toastContainer.appendChild(toast);
-        
-        setTimeout(() => toast.classList.add('show'), 10); // Show toast
+        setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
             toast.addEventListener('transitionend', () => toast.remove());
-        }, 4000); // Hide after 4 seconds
+        }, 4000);
     }
     
-    // --- Data Fetching Function ---
+    // --- 3. Data Fetching Function ---
     async function fetchSubmissionDetails(docId) {
+        displayState('loading');
         try {
             const docRef = doc(db, "exams", docId);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                
+                // Populate data safely, providing a fallback for each field
                 document.getElementById('student-name').textContent = data.name || 'غير متوفر';
                 document.getElementById('student-id').textContent = data.idNumber || 'غير متوفر';
                 document.getElementById('student-phone').textContent = data.phone || 'غير متوفر';
                 document.getElementById('student-email').textContent = data.email || 'غير متوفر';
                 document.getElementById('submission-wordcount').textContent = data.wordCount || '0';
+                document.getElementById('submission-answer').textContent = data.answer || 'لم يتم تقديم إجابة.';
                 
-                // ✅ FIX: Using 'submissionTime' field and .toDate() method
+                // Safely handle the timestamp
                 if (data.submissionTime && data.submissionTime.toDate) {
                     document.getElementById('submission-timestamp').textContent = data.submissionTime.toDate().toLocaleString('ar-SA', {
                         year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -228,35 +249,30 @@
                 } else {
                     document.getElementById('submission-timestamp').textContent = 'غير متوفر';
                 }
-
-                document.getElementById('submission-answer').textContent = data.answer || 'لم يتم تقديم إجابة.';
-                loader.style.display = 'none';
-                content.style.display = 'block';
+                
+                displayState('success');
             } else {
-                loader.style.display = 'none'; errorMessage.style.display = 'block';
+                displayState('error', 'عذراً، هذه الإجابة غير موجودة. ربما تم حذفها.');
             }
         } catch (error) {
             console.error("Error fetching document:", error);
-            loader.style.display = 'none';
-            errorMessage.innerHTML = '<p>حدث خطأ أثناء الاتصال بقاعدة البيانات.</p>';
-            errorMessage.style.display = 'block';
+            if (error.code === 'permission-denied') {
+                displayState('error', 'خطأ في الأذونات. يرجى مراجعة قواعد الأمان في Firebase.');
+            } else {
+                displayState('error', 'حدث خطأ فني أثناء جلب البيانات.');
+            }
         }
     }
 
-    // --- IMPROVED: Delete Logic ---
+    // --- 4. Delete Logic ---
     async function executeDelete() {
         if (!currentDocId) return;
-
         deleteBtn.disabled = true;
         deleteBtn.textContent = 'جاري الحذف...';
-
         try {
             await deleteDoc(doc(db, "exams", currentDocId));
             showToast('✅ تم حذف الإجابة بنجاح.', 'success');
-            
-            // Redirect after a short delay to allow user to see the toast
             setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
-
         } catch (error) {
             console.error("Error deleting document:", error);
             showToast('❌ حدث خطأ أثناء الحذف.', 'error');
@@ -265,34 +281,27 @@
         }
     }
 
-    // --- Page Load & Event Listeners ---
-    window.onload = () => {
+    // --- 5. Page Initialization ---
+    function initializePage() {
         const urlParams = new URLSearchParams(window.location.search);
         currentDocId = urlParams.get('id');
 
         if (currentDocId) {
             fetchSubmissionDetails(currentDocId);
         } else {
-            loader.style.display = 'none';
-            errorMessage.style.display = 'block';
+            displayState('error', 'الرابط غير صحيح. يرجى التأكد من أن الرابط يحتوي على معرّف الإجابة.');
         }
 
-        // Show confirmation modal instead of native confirm
-        deleteBtn.addEventListener('click', () => {
-            deleteModal.style.display = 'flex';
-        });
-
-        // Hide modal on cancel
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.style.display = 'none';
-        });
-
-        // Execute delete on confirm
+        deleteBtn.addEventListener('click', () => deleteModal.style.display = 'flex');
+        cancelDeleteBtn.addEventListener('click', () => deleteModal.style.display = 'none');
         confirmDeleteBtn.addEventListener('click', () => {
             deleteModal.style.display = 'none';
             executeDelete();
         });
-    };
+    }
+
+    // Run the initialization function when the page loads
+    initializePage();
   </script>
 
 </body>
