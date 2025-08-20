@@ -176,12 +176,18 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // --- Firebase Config and Initialization ---
-    const firebaseConfig = { /* ... ضع إعدادات Firebase الخاصة بك هنا ... */ };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
+      authDomain: "database-506.firebaseapp.com",
+      projectId: "database-506",
+      storageBucket: "database-506.firebasestorage.app",
+      messagingSenderId: "926446561022",
+      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    // --- Global Variables & DOM Elements ---
     let currentDocId = null;
     const loader = document.getElementById('loader');
     const content = document.getElementById('content');
@@ -192,8 +198,6 @@
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-    // --- 1. State Management Function ---
-    // هذه الوظيفة مسؤولة عن عرض الواجهة المناسبة (تحميل، خطأ، أو المحتوى)
     function displayState(state, message = '') {
         loader.style.display = 'none';
         content.style.display = 'none';
@@ -206,11 +210,10 @@
             errorCard.style.display = 'block';
         } else if (state === 'success') {
             content.style.display = 'block';
-            deleteBtn.disabled = false; // تفعيل زر الحذف بعد تحميل البيانات بنجاح
+            deleteBtn.disabled = false;
         }
     }
 
-    // --- 2. Toast Notification Function ---
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -223,7 +226,6 @@
         }, 4000);
     }
     
-    // --- 3. Data Fetching Function ---
     async function fetchSubmissionDetails(docId) {
         displayState('loading');
         try {
@@ -233,7 +235,6 @@
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 
-                // Populate data safely, providing a fallback for each field
                 document.getElementById('student-name').textContent = data.name || 'غير متوفر';
                 document.getElementById('student-id').textContent = data.idNumber || 'غير متوفر';
                 document.getElementById('student-phone').textContent = data.phone || 'غير متوفر';
@@ -241,7 +242,6 @@
                 document.getElementById('submission-wordcount').textContent = data.wordCount || '0';
                 document.getElementById('submission-answer').textContent = data.answer || 'لم يتم تقديم إجابة.';
                 
-                // Safely handle the timestamp
                 if (data.submissionTime && data.submissionTime.toDate) {
                     document.getElementById('submission-timestamp').textContent = data.submissionTime.toDate().toLocaleString('ar-SA', {
                         year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -264,7 +264,6 @@
         }
     }
 
-    // --- 4. Delete Logic ---
     async function executeDelete() {
         if (!currentDocId) return;
         deleteBtn.disabled = true;
@@ -281,7 +280,6 @@
         }
     }
 
-    // --- 5. Page Initialization ---
     function initializePage() {
         const urlParams = new URLSearchParams(window.location.search);
         currentDocId = urlParams.get('id');
@@ -300,7 +298,6 @@
         });
     }
 
-    // Run the initialization function when the page loads
     initializePage();
   </script>
 
