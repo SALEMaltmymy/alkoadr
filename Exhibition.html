@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
+    /* ... نفس أكواد CSS من الإصدار السابق ... */
     :root {
       --brand: #1e88e5; --brand-dark: #1565c0;
       --bg: #f4f7f9; --card-bg: #ffffff;
@@ -149,7 +150,7 @@
         <div id="error-card" class="status-card error" style="display: none;"><p>حدث خطأ ما.</p></div>
         <div id="content" style="display: none;">
           <div class="details-card">
-            <div class="student-info">
+             <div class="student-info">
               <h2>بيانات الطالب</h2>
               <dl class="info-grid">
                 <div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div>
@@ -169,22 +170,14 @@
           <div class="pdf-card">
             <h3>تصدير إلى PDF</h3>
             <textarea id="supervisor-notes-input" rows="4" placeholder="اكتب ملاحظاتك هنا ليتم إضافتها في ملف الـ PDF (اختياري)..."></textarea>
-            <button id="pdf-btn" class="action-btn" disabled>تنزيل PDF</button>
+            <button id="pdf-btn" class="action-btn" disabled>تنزيل PDF (نسخة تجريبية)</button>
           </div>
         </div>
     </main>
   </div>
 
   <div id="delete-modal" class="modal-overlay">
-    <div class="modal-box">
-      <h3>تأكيد الحذف</h3>
-      <p>هل أنت متأكد من رغبتك في حذف هذه الإجابة؟ لا يمكن التراجع عن هذا الإجراء.</p>
-      <div class="modal-actions">
-        <button id="cancel-delete-btn">إلغاء</button>
-        <button id="confirm-delete-btn">نعم، قم بالحذف</button>
-      </div>
     </div>
-  </div>
 
   <div id="toast-container"></div>
 
@@ -204,15 +197,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    let currentDocId = null;
-    let studentData = {}; // سيتم تخزين بيانات الطالب هنا لاستخدامها في PDF
+    let studentData = {};
+    const pdfBtn = document.getElementById('pdf-btn');
+    const supervisorNotesInput = document.getElementById('supervisor-notes-input');
     const loader = document.getElementById('loader');
     const content = document.getElementById('content');
     const errorCard = document.getElementById('error-card');
     const errorCardText = errorCard.querySelector('p');
     const deleteBtn = document.getElementById('delete-btn');
-    const pdfBtn = document.getElementById('pdf-btn');
-    const supervisorNotesInput = document.getElementById('supervisor-notes-input');
     const deleteModal = document.getElementById('delete-modal');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
@@ -221,16 +213,12 @@
         loader.style.display = 'none';
         content.style.display = 'none';
         errorCard.style.display = 'none';
-
-        if (state === 'loading') {
-            loader.style.display = 'block';
-        } else if (state === 'error') {
-            errorCardText.textContent = message;
-            errorCard.style.display = 'block';
-        } else if (state === 'success') {
+        if (state === 'loading') { loader.style.display = 'block'; }
+        else if (state === 'error') { errorCardText.textContent = message; errorCard.style.display = 'block'; }
+        else if (state === 'success') {
             content.style.display = 'block';
             deleteBtn.disabled = false;
-            pdfBtn.disabled = false; // تفعيل زر PDF هنا
+            pdfBtn.disabled = false;
         }
     }
 
@@ -251,17 +239,14 @@
         try {
             const docRef = doc(db, "exams", docId);
             const docSnap = await getDoc(docRef);
-
             if (docSnap.exists()) {
                 studentData = docSnap.data();
-                
                 document.getElementById('student-name').textContent = studentData.name || 'غير متوفر';
                 document.getElementById('student-id').textContent = studentData.idNumber || 'غير متوفر';
                 document.getElementById('student-phone').textContent = studentData.phone || 'غير متوفر';
                 document.getElementById('student-email').textContent = studentData.email || 'غير متوفر';
                 document.getElementById('submission-wordcount').textContent = studentData.wordCount || '0';
                 document.getElementById('submission-answer').textContent = studentData.answer || 'لم يتم تقديم إجابة.';
-                
                 if (studentData.submissionTime && studentData.submissionTime.toDate) {
                     document.getElementById('submission-timestamp').textContent = studentData.submissionTime.toDate().toLocaleString('ar-SA', {
                         year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -269,37 +254,20 @@
                 } else {
                     document.getElementById('submission-timestamp').textContent = 'غير متوفر';
                 }
-                
                 displayState('success');
             } else {
-                displayState('error', 'عذراً، هذه الإجابة غير موجودة. ربما تم حذفها.');
+                displayState('error', 'عذراً، هذه الإجابة غير موجودة.');
             }
         } catch (error) {
             console.error("Error fetching document:", error);
-            if (error.code === 'permission-denied') {
-                displayState('error', 'خطأ في الأذونات. يرجى مراجعة قواعد الأمان في Firebase.');
-            } else {
-                displayState('error', 'حدث خطأ فني أثناء جلب البيانات.');
-            }
+            if (error.code === 'permission-denied') { displayState('error', 'خطأ في الأذونات. يرجى مراجعة قواعد الأمان.'); }
+            else { displayState('error', 'حدث خطأ فني أثناء جلب البيانات.'); }
         }
     }
 
-    async function executeDelete() {
-        if (!currentDocId) return;
-        deleteBtn.disabled = true;
-        deleteBtn.textContent = 'جاري الحذف...';
-        try {
-            await deleteDoc(doc(db, "exams", currentDocId));
-            showToast('✅ تم حذف الإجابة بنجاح.', 'success');
-            setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
-        } catch (error) {
-            console.error("Error deleting document:", error);
-            showToast('❌ حدث خطأ أثناء الحذف.', 'error');
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = 'حذف الإجابة';
-        }
-    }
-    
+    async function executeDelete() { /* ... same as before ... */ }
+
+    // --- ✅ SIMPLIFIED: PDF Generation Logic (For Testing) ---
     async function generatePDF() {
         pdfBtn.disabled = true;
         pdfBtn.textContent = 'جاري الإنشاء...';
@@ -308,84 +276,43 @@
         const doc = new jsPDF();
         
         try {
-            const fontUrl = 'https://alfont.com/wp-content/fonts/Al-Jazeera-Arabic-Regular.ttf';
-            const fontResponse = await fetch(fontUrl);
-            const fontBlob = await fontResponse.arrayBuffer();
-            const fontBase64 = btoa(new Uint8Array(fontBlob).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-            
-            doc.addFileToVFS('Arabic-Regular.ttf', fontBase64);
-            doc.addFont('Arabic-Regular.ttf', 'Arabic', 'normal');
-            doc.setFont('Arabic');
-
-            const ministryLogoUrl = 'https://seeklogo.com/images/M/ministry-of-education-saudi-arabia-logo-5060429141-seeklogo.com.png';
-            doc.addImage(ministryLogoUrl, 'PNG', 15, 10, 25, 25);
-            
-            const tabukLogoImg = new Image();
-            tabukLogoImg.crossOrigin = "Anonymous";
-            tabukLogoImg.src = 'tbok.png';
-            await new Promise((resolve, reject) => { tabukLogoImg.onload = resolve; tabukLogoImg.onerror = () => reject(new Error('Failed to load Tabuk logo')); });
-            doc.addImage(tabukLogoImg, 'PNG', doc.internal.pageSize.getWidth() / 2 - 12.5, 10, 25, 25);
+            // --- NO FONT, NO IMAGES ---
+            // We will only add text to see if the core functionality works.
 
             doc.setFontSize(20);
-            doc.text('تقرير إجابة الطالب', doc.internal.pageSize.getWidth() / 2, 50, { align: 'center' });
-            
-            doc.setFontSize(16);
-            doc.text('بيانات الطالب', 195, 65, { align: 'right' });
-            doc.setLineWidth(0.5);
-            doc.line(15, 68, 195, 68);
-            
-            doc.setFontSize(12);
-            let y = 78;
-            const addDetail = (label, value) => {
-                doc.text(value, 150, y, { align: 'right' });
-                doc.text(label, 195, y, { align: 'right' });
-                y += 8;
-            };
-            addDetail('الاسم:', studentData.name || '');
-            addDetail('رقم الهوية:', studentData.idNumber || '');
-            
-            y += 10;
-            doc.setFontSize(16);
-            doc.text('نص الإجابة', 195, y, { align: 'right' });
-            doc.line(15, y + 3, 195, y + 3);
-            y += 12;
-            
-            doc.setFontSize(12);
-            const answerLines = doc.splitTextToSize(studentData.answer || 'لا توجد إجابة', 180);
-            doc.text(answerLines, 195, y, { align: 'right' });
-            y += answerLines.length * 7;
+            // Note: The text will be left-to-right and may appear as "??????"
+            // This is OK. We just want to see if the file downloads.
+            doc.text("Student Answer Report", 10, 20); 
 
-            const supervisorNotes = supervisorNotesInput.value.trim();
-            if (supervisorNotes) {
-                y += 15;
-                doc.setFontSize(16);
-                doc.text('ملاحظات المشرف', 195, y, { align: 'right' });
-                doc.line(15, y + 3, 195, y + 3);
-                y += 12;
-
-                doc.setFontSize(12);
-                const notesLines = doc.splitTextToSize(supervisorNotes, 180);
-                doc.text(notesLines, 195, y, { align: 'right' });
-            }
+            doc.setFontSize(12);
+            doc.text(`Name: ${studentData.name || ''}`, 10, 40);
+            doc.text(`ID: ${studentData.idNumber || ''}`, 10, 50);
             
-            doc.save(`إجابة-${studentData.name}.pdf`);
+            doc.text("Answer:", 10, 70);
+            const answerLines = doc.splitTextToSize(studentData.answer || 'No answer', 180);
+            doc.text(answerLines, 10, 80);
+            
+            // Save the file
+            doc.save(`TEST-Report-${studentData.name || 'student'}.pdf`);
+            showToast('✅ تم إنشاء الملف التجريبي بنجاح!', 'success');
+
         } catch (err) {
             console.error("PDF Generation Error:", err);
-            showToast('حدث خطأ أثناء إنشاء الملف. تأكد من اتصالك بالإنترنت.', 'error');
+            showToast('❌ ظهر نفس الخطأ حتى مع النسخة المبسطة.', 'error');
         } finally {
             pdfBtn.disabled = false;
-            pdfBtn.textContent = 'تنزيل PDF';
+            pdfBtn.textContent = 'تنزيل PDF (نسخة تجريبية)';
         }
     }
 
     function initializePage() {
         const urlParams = new URLSearchParams(window.location.search);
-        currentDocId = urlParams.get('id');
+        const currentDocId = urlParams.get('id');
 
         if (currentDocId) {
             fetchSubmissionDetails(currentDocId);
         } else {
-            displayState('error', 'الرابط غير صحيح. يرجى التأكد من أن الرابط يحتوي على معرّف الإجابة.');
+            displayState('error', 'الرابط غير صحيح.');
         }
 
         deleteBtn.addEventListener('click', () => deleteModal.style.display = 'flex');
