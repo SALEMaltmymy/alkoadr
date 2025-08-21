@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تفاصيل الإجابة</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* ... نفس أكواد CSS من الإصدار السابق ... */
     :root {
       --brand: #1e88e5; --brand-dark: #1565c0;
       --bg: #f4f7f9; --card-bg: #ffffff;
@@ -33,16 +31,19 @@
     .header .brand img { height: 50px; }
     .header .brand h1 { margin: 0; font-size: 22px; color: var(--brand-dark); }
     .header-actions { display: flex; gap: 10px; }
-    .action-btn {
+    .back-btn, .delete-btn {
       text-decoration: none; padding: 10px 20px; border-radius: 12px;
       font-weight: 500; transition: all 0.2s ease;
       border: none; cursor: pointer; font-family: inherit; font-size: 14px;
     }
-    .back-btn { background-color: var(--bg); color: var(--ink); border: 1px solid var(--border-color); }
+    .back-btn {
+      background-color: var(--bg); color: var(--ink);
+      border: 1px solid var(--border-color);
+    }
     .back-btn:hover { background-color: #e2e8f0; border-color: #cbd5e1; }
     .delete-btn { background-color: var(--danger); color: white; }
     .delete-btn:hover { background-color: var(--danger-dark); }
-    .delete-btn:disabled, #pdf-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
+    .delete-btn:disabled { background-color: #fca5a5; cursor: not-allowed; }
     
     .status-card {
       text-align: center; font-size: 18px; color: var(--muted);
@@ -51,14 +52,14 @@
     }
     .status-card.error { color: var(--danger-dark); }
     
-    .details-card, .pdf-card {
+    .details-card {
       background: var(--card-bg); border-radius: 18px;
       box-shadow: var(--shadow); overflow: hidden;
       animation: fade-up 0.6s ease;
     }
-    .pdf-card { margin-top: 30px; padding: 30px; }
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .student-info { padding: 30px; border-bottom: 1px solid var(--border-color); }
     .student-info h2 {
@@ -67,7 +68,8 @@
       border-bottom: 1px solid var(--border-color);
     }
     .info-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
     }
     .info-item { display: flex; flex-direction: column; }
     .info-item dt { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
@@ -82,19 +84,6 @@
       line-height: 1.8; font-size: 16px; white-space: pre-wrap;
       border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto;
     }
-    
-    .pdf-card h3 { margin-top: 0; margin-bottom: 15px; }
-    .pdf-card textarea {
-      width: 100%; box-sizing: border-box; font-family: inherit;
-      border-radius: 12px; border: 1px solid var(--border-color);
-      padding: 15px; font-size: 15px; line-height: 1.7; resize: vertical; margin-bottom: 20px;
-    }
-    #pdf-btn {
-      background-color: var(--success); color: white; width: 100%;
-      padding-top: 12px; padding-bottom: 12px; font-size: 16px;
-    }
-    #pdf-btn:hover { background-color: #16a34a; }
-    
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.6);
@@ -140,17 +129,17 @@
     <header class="header">
       <div class="brand"><img src="tbok.png" alt="شعار جامعة تبوك"><h1>تفاصيل الإجابة</h1></div>
       <div class="header-actions">
-        <a href="admin.html" class="action-btn back-btn">→ العودة</a>
-        <button id="delete-btn" class="action-btn delete-btn" disabled>حذف</button>
+        <a href="admin.html" class="back-btn">→ العودة للوحة التحكم</a>
+        <button id="delete-btn" class="delete-btn" disabled>حذف الإجابة</button>
       </div>
     </header>
     
     <main id="page-wrapper">
-        <div id="loader" class="status-card"><p>جاري تحميل التفاصيل...</p></div>
+        <div id="loader" class="status-card"><p>جاري تحميل تفاصيل الإجابة...</p></div>
         <div id="error-card" class="status-card error" style="display: none;"><p>حدث خطأ ما.</p></div>
         <div id="content" style="display: none;">
           <div class="details-card">
-             <div class="student-info">
+            <div class="student-info">
               <h2>بيانات الطالب</h2>
               <dl class="info-grid">
                 <div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div>
@@ -158,26 +147,28 @@
                 <div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div>
                 <div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div>
                 <div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div>
-                <div class="info-item"><dt>عدد الكلمات</dt><dd id="submission-wordcount"></dd></div>
+                <div class="info-item"><dt>عدد الكلمات المكتوبة</dt><dd id="submission-wordcount"></dd></div>
               </dl>
             </div>
             <div class="exam-answer">
-              <h3>نص الإجابة</h3>
+              <h3>نص إجابة الاختبار</h3>
               <div class="answer-text" id="submission-answer"></div>
             </div>
-          </div>
-
-          <div class="pdf-card">
-            <h3>تصدير إلى PDF</h3>
-            <textarea id="supervisor-notes-input" rows="4" placeholder="اكتب ملاحظاتك هنا ليتم إضافتها في ملف الـ PDF (اختياري)..."></textarea>
-            <button id="pdf-btn" class="action-btn" disabled>تنزيل PDF (نسخة تجريبية)</button>
           </div>
         </div>
     </main>
   </div>
 
   <div id="delete-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>تأكيد الحذف</h3>
+        <p>هل أنت متأكد من رغبتك في حذف هذه الإجابة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <div class="modal-actions">
+            <button id="cancel-delete-btn">إلغاء</button>
+            <button id="confirm-delete-btn">نعم، قم بالحذف</button>
+        </div>
     </div>
+  </div>
 
   <div id="toast-container"></div>
 
@@ -197,9 +188,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    let studentData = {};
-    const pdfBtn = document.getElementById('pdf-btn');
-    const supervisorNotesInput = document.getElementById('supervisor-notes-input');
+    let currentDocId = null;
     const loader = document.getElementById('loader');
     const content = document.getElementById('content');
     const errorCard = document.getElementById('error-card');
@@ -213,12 +202,15 @@
         loader.style.display = 'none';
         content.style.display = 'none';
         errorCard.style.display = 'none';
-        if (state === 'loading') { loader.style.display = 'block'; }
-        else if (state === 'error') { errorCardText.textContent = message; errorCard.style.display = 'block'; }
-        else if (state === 'success') {
+
+        if (state === 'loading') {
+            loader.style.display = 'block';
+        } else if (state === 'error') {
+            errorCardText.textContent = message;
+            errorCard.style.display = 'block';
+        } else if (state === 'success') {
             content.style.display = 'block';
             deleteBtn.disabled = false;
-            pdfBtn.disabled = false;
         }
     }
 
@@ -239,80 +231,63 @@
         try {
             const docRef = doc(db, "exams", docId);
             const docSnap = await getDoc(docRef);
+
             if (docSnap.exists()) {
-                studentData = docSnap.data();
-                document.getElementById('student-name').textContent = studentData.name || 'غير متوفر';
-                document.getElementById('student-id').textContent = studentData.idNumber || 'غير متوفر';
-                document.getElementById('student-phone').textContent = studentData.phone || 'غير متوفر';
-                document.getElementById('student-email').textContent = studentData.email || 'غير متوفر';
-                document.getElementById('submission-wordcount').textContent = studentData.wordCount || '0';
-                document.getElementById('submission-answer').textContent = studentData.answer || 'لم يتم تقديم إجابة.';
-                if (studentData.submissionTime && studentData.submissionTime.toDate) {
-                    document.getElementById('submission-timestamp').textContent = studentData.submissionTime.toDate().toLocaleString('ar-SA', {
+                const data = docSnap.data();
+                
+                document.getElementById('student-name').textContent = data.name || 'غير متوفر';
+                document.getElementById('student-id').textContent = data.idNumber || 'غير متوفر';
+                document.getElementById('student-phone').textContent = data.phone || 'غير متوفر';
+                document.getElementById('student-email').textContent = data.email || 'غير متوفر';
+                document.getElementById('submission-wordcount').textContent = data.wordCount || '0';
+                document.getElementById('submission-answer').textContent = data.answer || 'لم يتم تقديم إجابة.';
+                
+                if (data.submissionTime && data.submissionTime.toDate) {
+                    document.getElementById('submission-timestamp').textContent = data.submissionTime.toDate().toLocaleString('ar-SA', {
                         year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                     });
                 } else {
                     document.getElementById('submission-timestamp').textContent = 'غير متوفر';
                 }
+                
                 displayState('success');
             } else {
-                displayState('error', 'عذراً، هذه الإجابة غير موجودة.');
+                displayState('error', 'عذراً، هذه الإجابة غير موجودة. ربما تم حذفها.');
             }
         } catch (error) {
             console.error("Error fetching document:", error);
-            if (error.code === 'permission-denied') { displayState('error', 'خطأ في الأذونات. يرجى مراجعة قواعد الأمان.'); }
-            else { displayState('error', 'حدث خطأ فني أثناء جلب البيانات.'); }
+            if (error.code === 'permission-denied') {
+                displayState('error', 'خطأ في الأذونات. يرجى مراجعة قواعد الأمان في Firebase.');
+            } else {
+                displayState('error', 'حدث خطأ فني أثناء جلب البيانات.');
+            }
         }
     }
 
-    async function executeDelete() { /* ... same as before ... */ }
-
-    // --- ✅ SIMPLIFIED: PDF Generation Logic (For Testing) ---
-    async function generatePDF() {
-        pdfBtn.disabled = true;
-        pdfBtn.textContent = 'جاري الإنشاء...';
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
+    async function executeDelete() {
+        if (!currentDocId) return;
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'جاري الحذف...';
         try {
-            // --- NO FONT, NO IMAGES ---
-            // We will only add text to see if the core functionality works.
-
-            doc.setFontSize(20);
-            // Note: The text will be left-to-right and may appear as "??????"
-            // This is OK. We just want to see if the file downloads.
-            doc.text("Student Answer Report", 10, 20); 
-
-            doc.setFontSize(12);
-            doc.text(`Name: ${studentData.name || ''}`, 10, 40);
-            doc.text(`ID: ${studentData.idNumber || ''}`, 10, 50);
-            
-            doc.text("Answer:", 10, 70);
-            const answerLines = doc.splitTextToSize(studentData.answer || 'No answer', 180);
-            doc.text(answerLines, 10, 80);
-            
-            // Save the file
-            doc.save(`TEST-Report-${studentData.name || 'student'}.pdf`);
-            showToast('✅ تم إنشاء الملف التجريبي بنجاح!', 'success');
-
-        } catch (err) {
-            console.error("PDF Generation Error:", err);
-            showToast('❌ ظهر نفس الخطأ حتى مع النسخة المبسطة.', 'error');
-        } finally {
-            pdfBtn.disabled = false;
-            pdfBtn.textContent = 'تنزيل PDF (نسخة تجريبية)';
+            await deleteDoc(doc(db, "exams", currentDocId));
+            showToast('✅ تم حذف الإجابة بنجاح.', 'success');
+            setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
+        } catch (error) {
+            console.error("Error deleting document:", error);
+            showToast('❌ حدث خطأ أثناء الحذف.', 'error');
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'حذف الإجابة';
         }
     }
 
     function initializePage() {
         const urlParams = new URLSearchParams(window.location.search);
-        const currentDocId = urlParams.get('id');
+        currentDocId = urlParams.get('id');
 
         if (currentDocId) {
             fetchSubmissionDetails(currentDocId);
         } else {
-            displayState('error', 'الرابط غير صحيح.');
+            displayState('error', 'الرابط غير صحيح. يرجى التأكد من أن الرابط يحتوي على معرّف الإجابة.');
         }
 
         deleteBtn.addEventListener('click', () => deleteModal.style.display = 'flex');
@@ -321,7 +296,6 @@
             deleteModal.style.display = 'none';
             executeDelete();
         });
-        pdfBtn.addEventListener('click', generatePDF);
     }
 
     initializePage();
