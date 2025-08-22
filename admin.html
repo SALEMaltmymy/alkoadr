@@ -7,127 +7,66 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand: #1e88e5;
-      --brand-dark: #1565c0;
-      --bg: #f4f7f9;
-      --card-bg: #ffffff;
-      --shadow: 0 8px 25px rgba(0,0,0,.08);
-      --ink: #0f172a;
-      --muted: #6b7280;
-      --border-color: #e5e7eb;
+      --brand: #1e88e5; --brand-dark: #1565c0; --brand-light: #e3f2fd;
+      --bg: #f4f7f9; --card-bg: #ffffff; --shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+      --ink: #0f172a; --muted: #6b7280; --border-color: #e5e7eb;
+      --error: #d32f2f; --success: #2e7d32;
     }
-    body {
-      margin: 0;
-      font-family: "Tajawal", sans-serif;
-      background-color: var(--bg);
-      color: var(--ink);
-    }
-    .container {
-      width: min(1200px, 92%);
-      margin: auto;
-      padding: 20px 0;
-    }
-    #login-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.7);
-      display: none;
-      justify-content: center; align-items: center; z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-    .login-box {
-      background: var(--card-bg); padding: 40px; border-radius: 20px;
-      text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.2);
-      animation: fade-in 0.5s ease;
-      width: min(350px, 90%);
-    }
-    @keyframes fade-in {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .login-box h2 { margin-top: 0; color: var(--brand-dark); }
-    .login-box input {
-      padding: 12px; border-radius: 12px; border: 1px solid #ccc;
-      width: 100%; margin-bottom: 10px; text-align: center; font-size: 16px;
-      box-sizing: border-box;
-    }
-    .login-box button {
-      padding: 12px 20px; border: none; background: var(--brand);
-      color: white; border-radius: 12px; cursor: pointer;
-      font-size: 16px; font-weight: bold; width: 100%;
-    }
-    .login-box .error { color: #d32f2f; min-height: 20px; font-size: 14px; }
-    #admin-content { display: none; }
-    .header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 15px 25px; background: var(--card-bg);
-      border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 30px;
-    }
-    .header img { height: 50px; }
-    .header h1 { margin: 0; font-size: 24px; color: var(--brand-dark); }
-    #loading-indicator, #empty-state {
-        text-align: center; font-size: 18px; color: var(--muted); padding: 50px;
-    }
-    .submissions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 25px;
-    }
-    .submission-card {
-      background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow);
-      display: flex; flex-direction: column;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      animation: fade-up 0.6s ease forwards;
-      opacity: 0;
-    }
-    .submission-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 35px rgba(0,0,0,.12);
-    }
-    .card-content {
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    .card-footer {
-        padding: 15px 20px;
-        border-top: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #fafafa;
-        border-bottom-left-radius: 18px;
-        border-bottom-right-radius: 18px;
-    }
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .user-avatar {
-      width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
-      flex-shrink: 0;
-    }
-    .user-info { text-align: right; flex-grow: 1; }
-    .user-info h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--ink); }
-    .user-info p { margin: 0; color: var(--muted); font-size: 15px; }
-    .submission-date {
-        font-size: 13px; color: var(--muted);
-    }
-    .view-btn {
-      text-decoration: none; background-color: var(--brand);
-      color: white; padding: 8px 20px; border-radius: 10px;
-      font-weight: 500; font-size: 14px;
-      transition: background-color 0.2s ease;
-    }
-    .view-btn:hover { background-color: var(--brand-dark); }
-    .submission-card.is-hidden { display: none; }
-    .show-more-container { text-align: center; padding: 30px 0; }
-    #show-more-btn {
-        background-color: var(--brand-dark); color: white;
-        padding: 12px 30px; border: none; border-radius: 12px;
-        font-size: 16px; font-weight: bold; cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
+    body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); }
+    .container { width: min(950px, 94%); margin: 20px auto; padding: 20px 0; }
+    .site-header { text-align: center; margin-bottom: 30px; }
+    .site-header .logo { max-width: 90px; height: auto; margin-bottom: 15px; }
+    .site-header h1 { font-weight: 800; color: var(--brand-dark); margin: 0 0 5px 0; }
+    .site-header h2 { font-weight: 700; color: var(--ink); margin: 0; font-size: 1.2em; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .page-header h1, .page-header h2 { margin: 0; font-size: 1.8em; color: var(--ink); }
+    .card { background: var(--card-bg); border-radius: 22px; box-shadow: var(--shadow); padding: 30px; margin-bottom: 25px; border-top: 4px solid var(--brand); }
+    input, textarea, label { display: block; width: 100%; padding: 14px; margin-bottom: 12px; border: 1.5px solid var(--border-color); border-radius: 14px; font-family: inherit; font-size: 15px; box-sizing: border-box; }
+    label { border: none; padding: 0 5px 5px; margin-bottom: 0; font-weight: 500; color: var(--muted); }
+    button { background: var(--brand); color: white; border: none; padding: 12px 24px; border-radius: 14px; font-size: 16px; cursor: pointer; transition: all 0.2s ease-in-out; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    button:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary { background: #6c757d; } .btn-secondary:hover { background: #5a6268; }
+    .btn-danger { background: var(--error); } .btn-danger:hover { background: #c62828; }
+    .loader { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.5); border-top-color: #FFF; border-radius: 50%; display: inline-block; animation: rotation 0.8s linear infinite; }
+    @keyframes rotation { to { transform: rotate(360deg); } }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px); }
+    .modal-content { background: #fff; padding: 30px; border-radius: 20px; width: min(650px, 92%); max-height: 90vh; overflow-y: auto; animation: modal-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modal-fade-in { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; }
+    .modal-header h3 { margin: 0; font-size: 1.5em; }
+    .close-btn { font-size: 28px; line-height: 1; border: none; background: none; cursor: pointer; color: var(--muted); transition: color 0.2s; }
+    .close-btn:hover { color: var(--ink); }
+    .question-block { border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-top: 15px; background: #fafafa; }
+    .notification { padding: 15px; border-radius: 12px; color: #fff; text-align: center; margin-bottom: 15px; display: none; }
+    .notification.success { background-color: var(--success); }
+    .notification.error { background-color: var(--error); }
+    #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1001; backdrop-filter: blur(8px); }
+    .login-box { background: var(--card-bg); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.2); width: min(350px, 90%); }
+    .credit { text-align: center; color: #6b7280; font-size: 14px; margin-top: 40px;}
+    .exam-card, .submission-card { display: flex; flex-direction: column; gap: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .card-header h3 { margin: 0; font-size: 1.3em; color: var(--brand-dark); }
+    .card-meta { font-size: 0.9em; color: var(--muted); }
+    .card-body input { background: #f0f3f5; border: 1px solid var(--border-color); font-size: 14px; direction: ltr; text-align: left; padding: 10px 14px; }
+    .card-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+    .status-control { display: flex; align-items: center; gap: 10px; }
+    .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--success); }
+    input:checked + .slider:before { transform: translateX(22px); }
+    .status-text { font-weight: bold; }
+    .status-text.active { color: var(--success); }
+    .status-text.inactive { color: var(--muted); }
+    .btn-icon { background: none; padding: 5px; min-width: auto; }
+    .btn-icon:hover { background: var(--brand-light); }
+    #submissions-view h2 { color: var(--ink); }
+    #submission-details-content p { margin: 8px 0; font-size: 1.05em; line-height: 1.6; }
+    #submission-details-content p strong { color: var(--ink); }
+    #submission-details-content hr { margin: 20px 0; border: 0; border-top: 1px solid var(--border-color); }
+    #submission-details-content .answer-block { background: var(--brand-light); border-right: 4px solid var(--brand); padding: 15px 20px; border-radius: 8px; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -135,171 +74,307 @@
   <div id="login-overlay">
     <div class="login-box">
       <h2>لوحة تحكم المشرف</h2>
-      <p>الرجاء إدخال كلمة المرور للوصول</p>
       <input type="password" id="password-input" placeholder="••••••••">
-      <div class="error" id="error-message"></div>
       <button id="login-btn">دخول</button>
     </div>
   </div>
 
-  <div id="admin-content" class="container">
-    <header class="header">
-      <h1>إجابات الطلاب</h1>
-      <img src="tbok.png" alt="شعار جامعة تبوك">
+  <div id="admin-content" style="display: none;" class="container">
+    <header class="site-header">
+      <img src="tbok.png" alt="شعار جامعة تبوك" class="logo">
+      <h1>جامعة تبوك</h1>
+      <h2>لوحة تحكم كوادر السلامة والصحة المهنية</h2>
     </header>
-    <div id="loading-indicator"><p>جاري تحميل البيانات...</p></div>
-    <div id="empty-state" style="display: none;"><p>لا توجد إجابات مقدمة حتى الآن.</p></div>
-    <div class="submissions-grid" id="submissions-grid"></div>
-    <div class="show-more-container" id="show-more-container" style="display: none;">
-      <button id="show-more-btn">عرض المزيد</button>
+    <main>
+      <div id="exams-view">
+        <div class="page-header">
+          <h1>الاختبارات المنشأة</h1>
+          <button id="show-create-exam-modal-btn">+ إنشاء اختبار جديد</button>
+        </div>
+        <div id="exams-list-container"><p>جاري تحميل الاختبارات...</p></div>
+      </div>
+      <div id="submissions-view" style="display: none;">
+        <div class="page-header">
+          <h2 id="submissions-title"></h2>
+          <button id="back-to-exams-btn" class="btn-secondary">&larr; العودة لقائمة الاختبارات</button>
+        </div>
+        <div id="submissions-list-container"></div>
+      </div>
+    </main>
+    <footer class="credit">
+        <p>اعداد/المهندس خالد الغامدي</p>
+    </footer>
+  </div>
+
+  <div id="create-exam-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header"><h3>إنشاء اختبار جديد</h3><button class="close-btn" data-modal-id="create-exam-modal">&times;</button></div>
+      <div id="notification-area"></div>
+      <label for="exam-title">عنوان الاختبار</label>
+      <input type="text" id="exam-title" placeholder="مثال: اختبار السلامة المهنية - الأسبوع الأول">
+      <div id="questions-container"></div>
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button id="add-question-btn" class="btn-secondary">إضافة سؤال</button>
+        <button id="remove-question-btn" class="btn-danger" style="display: none;">حذف آخر سؤال</button>
+      </div>
+      <hr style="border:0; border-top: 1px solid var(--border-color); margin: 25px 0;">
+      <button id="save-exam-btn" style="width: 100%;">حفظ ونشر الاختبار</button>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <div id="submission-details-modal" class="modal">
+    <div class="modal-content">
+       <div class="modal-header"><h3>تفاصيل إجابة الطالب</h3><button class="close-btn" data-modal-id="submission-details-modal">&times;</button></div>
+      <div id="submission-details-content"></div>
+    </div>
+  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // --- الجزء الخاص بتسجيل الدخول المؤقت ---
-      const loginOverlay = document.getElementById('login-overlay');
-      const adminContent = document.getElementById('admin-content');
-      const passwordInput = document.getElementById('password-input');
-      const loginBtn = document.getElementById('login-btn');
-      const errorMessage = document.getElementById('error-message');
-      const correctPassword = "KHLEDADMIN";
-      const sessionTimeout = 15 * 60 * 1000; // 15 دقيقة
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      function handleLogin() {
-        if (passwordInput.value === correctPassword) {
-          localStorage.setItem('loginTimestamp', Date.now());
-          checkLoginSession();
-        } else {
-          errorMessage.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
-        }
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
+      authDomain: "database-506.firebaseapp.com",
+      projectId: "database-506",
+      storageBucket: "database-506.firebasestorage.app",
+      messagingSenderId: "926446561022",
+      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const BASE_URL = "https://tabukexnes.netlify.app";
+
+    const loginOverlay = document.getElementById('login-overlay');
+    const adminContent = document.getElementById('admin-content');
+    const loginBtn = document.getElementById('login-btn');
+    const passwordInput = document.getElementById('password-input');
+    const correctPassword = "KHLEDADMIN";
+
+    function checkLogin() {
+      if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+        loginOverlay.style.display = 'none';
+        adminContent.style.display = 'block';
+        loadExams();
+      } else {
+        loginOverlay.style.display = 'flex';
       }
-
-      function checkLoginSession() {
-        const loginTimestamp = localStorage.getItem('loginTimestamp');
-        if (loginTimestamp && (Date.now() - loginTimestamp < sessionTimeout)) {
-          loginOverlay.style.display = 'none';
-          adminContent.style.display = 'block';
-          fetchSubmissions(); 
-        } else {
-          loginOverlay.style.display = 'flex';
-          adminContent.style.display = 'none';
-          localStorage.removeItem('loginTimestamp');
-        }
-      }
-
-      loginBtn.addEventListener('click', handleLogin);
-      passwordInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') handleLogin();
-      });
-
-      // --- الجزء الخاص بـ Firebase وجلب البيانات ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
-        authDomain: "database-506.firebaseapp.com",
-        projectId: "database-506",
-        storageBucket: "database-506.firebasestorage.app",
-        messagingSenderId: "926446561022",
-        appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af",
-        measurementId: "G-F63G3YFTYY"
-      };
-
-      // تهيئة التطبيق وقاعدة البيانات
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      const db = firebase.firestore();
-
-      function formatTimestamp(timestamp) {
-        if (!timestamp || typeof timestamp.toDate !== 'function') {
-          return 'تاريخ غير متوفر';
-        }
-        return timestamp.toDate().toLocaleString('ar-SA', {
-          year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-      }
-
-      async function fetchSubmissions() {
-        const grid = document.getElementById('submissions-grid');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const emptyState = document.getElementById('empty-state');
-        const showMoreContainer = document.getElementById('show-more-container');
-        
-        grid.innerHTML = '';
-        loadingIndicator.style.display = 'block';
-        emptyState.style.display = 'none';
-        showMoreContainer.style.display = 'none';
-        
-        try {
-          const querySnapshot = await db.collection("exams")
-                                         .orderBy("submissionTime", "desc")
-                                         .get();
-
-          loadingIndicator.style.display = 'none';
-
-          if (querySnapshot.empty) {
-            emptyState.style.display = 'block';
-            return;
-          }
-
-          let cardCount = 0;
-          const visibleLimit = 12;
-
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const card = document.createElement('div');
-            card.className = 'submission-card';
-            
-            if (cardCount >= visibleLimit) {
-              card.classList.add('is-hidden');
-            }
-            card.style.animationDelay = `${(cardCount % visibleLimit) * 0.05}s`;
-            
-            const name = data.name || 'غير معروف';
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.charAt(0))}&background=random&color=fff&size=60&font-size=0.5`;
-
-            card.innerHTML = `
-              <div class="card-content">
-                <img src="${avatarUrl}" alt="صورة الطالب" class="user-avatar">
-                <div class="user-info">
-                  <h3>${name}</h3>
-                  <p>رقم الهوية: ${data.idNumber || 'غير متوفر'}</p>
-                </div>
-              </div>
-              <div class="card-footer">
-                <span class="submission-date">${formatTimestamp(data.submissionTime)}</span>
-                <a href="Exhibition.html?id=${doc.id}" class="view-btn">عرض التفاصيل</a>
-              </div>
-            `;
-            grid.appendChild(card);
-            cardCount++;
-          });
-          
-          if (querySnapshot.size > visibleLimit) {
-            showMoreContainer.style.display = 'block';
-          }
-
-        } catch (error) {
-          loadingIndicator.innerHTML = '<p style="color: red;">حدث خطأ أثناء جلب البيانات. تأكد من اتصالك بالإنترنت وقواعد الأمان في Firebase.</p>';
-          console.error("Error fetching documents: ", error);
-        }
-      }
-      
-      const showMoreBtn = document.getElementById('show-more-btn');
-      showMoreBtn.addEventListener('click', () => {
-        document.querySelectorAll('.submission-card.is-hidden').forEach(card => {
-          card.classList.remove('is-hidden');
-        });
-        showMoreBtn.parentElement.style.display = 'none';
-      });
-      
-      // بدء تشغيل الكود عند تحميل الصفحة
-      checkLoginSession();
+    }
+    loginBtn.addEventListener('click', () => {
+      if (passwordInput.value === correctPassword) { sessionStorage.setItem('adminLoggedIn', 'true'); checkLogin(); } 
+      else { alert('كلمة المرور غير صحيحة'); }
     });
-  </script>
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
 
+    const examsView = document.getElementById('exams-view');
+    const submissionsView = document.getElementById('submissions-view');
+    const examsListContainer = document.getElementById('exams-list-container');
+    const submissionsListContainer = document.getElementById('submissions-list-container');
+    const backToExamsBtn = document.getElementById('back-to-exams-btn');
+    const submissionsTitle = document.getElementById('submissions-title');
+    const createExamModal = document.getElementById('create-exam-modal');
+    const submissionDetailsModal = document.getElementById('submission-details-modal');
+    const examTitleInput = document.getElementById('exam-title');
+    const questionsContainer = document.getElementById('questions-container');
+    const addQuestionBtn = document.getElementById('add-question-btn');
+    const removeQuestionBtn = document.getElementById('remove-question-btn');
+    const saveExamBtn = document.getElementById('save-exam-btn');
+    const notificationArea = document.getElementById('notification-area');
+    let questionCount = 0;
+
+    document.getElementById('show-create-exam-modal-btn').addEventListener('click', () => createExamModal.style.display = 'flex');
+    document.querySelectorAll('.close-btn').forEach(btn => {
+      btn.addEventListener('click', () => { document.getElementById(btn.dataset.modalId).style.display = 'none'; });
+    });
+
+    const showNotification = (message, type) => {
+      const notif = Object.assign(document.createElement('div'), { className: `notification ${type}`, textContent: message });
+      notificationArea.innerHTML = '';
+      notificationArea.appendChild(notif);
+      notif.style.display = 'block';
+      setTimeout(() => { notif.style.display = 'none'; }, 4000);
+    };
+
+    const updateButtons = () => {
+      addQuestionBtn.disabled = (questionCount >= 4);
+      removeQuestionBtn.style.display = (questionCount > 0) ? 'inline-block' : 'none';
+    };
+
+    addQuestionBtn.addEventListener('click', () => {
+      if (questionCount >= 4) return;
+      questionCount++;
+      const block = document.createElement('div');
+      block.className = 'question-block';
+      block.id = `q-block-${questionCount}`;
+      block.innerHTML = `<h4>السؤال ${questionCount}</h4><textarea name="q-text" rows="3" placeholder="نص السؤال"></textarea><div style="display:flex; gap:15px;"><div><label>المدة (دقائق)</label><input type="number" name="q-duration" placeholder="e.g., 7"></div><div><label>الكلمات</label><input type="number" name="q-wordcount" placeholder="e.g., 200"></div></div>`;
+      questionsContainer.appendChild(block);
+      updateButtons();
+    });
+
+    removeQuestionBtn.addEventListener('click', () => {
+      if (questionCount <= 0) return;
+      document.getElementById(`q-block-${questionCount}`).remove();
+      questionCount--;
+      updateButtons();
+    });
+
+    saveExamBtn.addEventListener('click', async () => {
+      const title = examTitleInput.value.trim();
+      if (!title) { showNotification('الرجاء إدخال عنوان للاختبار', 'error'); return; }
+      const questions = [];
+      let isValid = true;
+      questionsContainer.querySelectorAll('.question-block').forEach(b => {
+        const text = b.querySelector('[name="q-text"]').value.trim();
+        const duration = parseInt(b.querySelector('[name="q-duration"]').value, 10);
+        const wordCount = parseInt(b.querySelector('[name="q-wordcount"]').value, 10);
+        if (!text || isNaN(duration) || isNaN(wordCount) || duration <= 0 || wordCount <= 0) isValid = false;
+        questions.push({ text, duration, wordCount });
+      });
+      if (!isValid || questions.length === 0) { showNotification('الرجاء تعبئة جميع حقول الأسئلة بأرقام صحيحة', 'error'); return; }
+      
+      saveExamBtn.disabled = true;
+      saveExamBtn.innerHTML = '<span class="loader"></span> حفظ...';
+      try {
+        await addDoc(collection(db, "Exams"), { title, questions, isActive: false, createdAt: serverTimestamp() });
+        examTitleInput.value = '';
+        questionsContainer.innerHTML = '';
+        questionCount = 0;
+        updateButtons();
+        createExamModal.style.display = 'none';
+        loadExams();
+      } catch (error) { showNotification('حدث خطأ أثناء الحفظ', 'error'); console.error(error); } 
+      finally { saveExamBtn.disabled = false; saveExamBtn.textContent = 'حفظ ونشر الاختبار'; }
+    });
+
+    async function loadExams() {
+      examsListContainer.innerHTML = '<p>جاري تحميل الاختبارات...</p>';
+      const q = query(collection(db, "Exams"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      examsListContainer.innerHTML = querySnapshot.empty ? '<div class="card"><p>لم يتم إنشاء أي اختبارات بعد. اضغط على "+ إنشاء اختبار جديد" للبدء.</p></div>' : '';
+      querySnapshot.forEach(doc => {
+        const exam = doc.data();
+        const examId = doc.id;
+        const shareableLink = `${BASE_URL}/exam.html?id=${examId}`;
+        const card = document.createElement('div');
+        card.className = 'card exam-card';
+        card.innerHTML = `
+          <div class="card-header">
+            <h3>${exam.title}</h3>
+            <div class="status-control">
+              <span class="status-text ${exam.isActive ? 'active' : 'inactive'}">${exam.isActive ? 'فعال' : 'موقوف'}</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="toggle-status-btn" data-exam-id="${examId}" ${exam.isActive ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="card-body">
+            <label>رابط المشاركة (يعمل فقط إذا كان الاختبار فعالاً):</label>
+            <input type="text" value="${shareableLink}" readonly onclick="this.select()">
+          </div>
+          <div class="card-actions">
+            <div>
+              <button class="copy-link-btn" data-link="${shareableLink}">نسخ الرابط</button>
+              <button class="view-submissions-btn" data-exam-id="${examId}" data-exam-title="${exam.title}">عرض الإجابات</button>
+            </div>
+            <button class="btn-icon delete-exam-btn" data-exam-id="${examId}" title="حذف الاختبار">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--error);"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+          </div>`;
+        examsListContainer.appendChild(card);
+      });
+    }
+    
+    async function loadSubmissions(examId, examTitle) {
+      submissionsTitle.textContent = `إجابات اختبار: ${examTitle}`;
+      submissionsListContainer.innerHTML = '<p>جاري تحميل الإجابات...</p>';
+      const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"));
+      const querySnapshot = await getDocs(q);
+      submissionsListContainer.innerHTML = querySnapshot.empty ? '<div class="card"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>' : '';
+      querySnapshot.forEach(doc => {
+        const sub = doc.data();
+        const card = document.createElement('div');
+        card.className = 'card submission-card';
+        card.innerHTML = `
+          <div class="card-header">
+            <h3>${sub.name}</h3><span class="card-meta">${new Date(sub.submissionTime?.toDate()).toLocaleString('ar-SA')}</span>
+          </div>
+          <p class="card-meta">رقم الهوية: ${sub.idNumber}</p>
+          <div class="card-actions"><button class="view-details-btn">عرض التفاصيل الكاملة</button></div>`;
+        card.querySelector('.view-details-btn').addEventListener('click', () => showSubmissionDetails(sub));
+        submissionsListContainer.appendChild(card);
+      });
+    }
+
+    function showSubmissionDetails(submissionData) {
+        const contentDiv = document.getElementById('submission-details-content');
+        let answersHtml = submissionData.answers.map((ans, i) => `
+            <div class="answer-block">
+                <p><strong>السؤال ${i + 1}:</strong> ${ans.question}</p>
+                <p><strong>إجابة الطالب:</strong><br>${ans.answer.replace(/\n/g, '<br>') || '<em>لم تتم الإجابة.</em>'}</p>
+                <small>عدد الكلمات: ${ans.wordCount}</small>
+            </div>`).join('');
+        contentDiv.innerHTML = `
+            <p><strong>الاسم:</strong> ${submissionData.name}</p><p><strong>رقم الهوية:</strong> ${submissionData.idNumber}</p>
+            <p><strong>الجوال:</strong> ${submissionData.phone}</p><p><strong>البريد الإلكتروني:</strong> ${submissionData.email}</p>
+            <hr>${answersHtml}`;
+        submissionDetailsModal.style.display = 'flex';
+    }
+    
+    async function handleToggleStatus(examId, newStatus, statusTextElement) {
+      try {
+        await updateDoc(doc(db, "Exams", examId), { isActive: newStatus });
+        statusTextElement.textContent = newStatus ? 'فعال' : 'موقوف';
+        statusTextElement.className = `status-text ${newStatus ? 'active' : 'inactive'}`;
+      } catch (error) {
+        console.error("Error updating status: ", error);
+        alert("فشل تحديث حالة الاختبار.");
+        const checkbox = document.querySelector(`.toggle-status-btn[data-exam-id="${examId}"]`);
+        if(checkbox) checkbox.checked = !newStatus;
+      }
+    }
+
+    async function handleDeleteExam(examId) {
+      if (confirm("هل أنت متأكد من حذف هذا الاختبار؟\nسيتم حذف الاختبار بشكل نهائي ولا يمكن التراجع عن هذا الإجراء.")) {
+        try {
+          await deleteDoc(doc(db, "Exams", examId));
+          loadExams();
+        } catch (error) {
+          console.error("Error deleting exam: ", error);
+          alert("فشل حذف الاختبار.");
+        }
+      }
+    }
+
+    examsListContainer.addEventListener('click', (e) => {
+      const button = e.target.closest('button');
+      const toggle = e.target.closest('.toggle-status-btn');
+      if (button?.classList.contains('copy-link-btn')) {
+        navigator.clipboard.writeText(button.dataset.link);
+        button.textContent = 'تم النسخ!';
+        setTimeout(() => { button.textContent = 'نسخ الرابط'; }, 2000);
+      }
+      if (button?.classList.contains('view-submissions-btn')) {
+        examsView.style.display = 'none';
+        submissionsView.style.display = 'block';
+        loadSubmissions(button.dataset.examId, button.dataset.examTitle);
+      }
+      if (button?.classList.contains('delete-exam-btn')) {
+        handleDeleteExam(button.dataset.examId);
+      }
+      if (toggle) {
+        const statusText = toggle.closest('.status-control').querySelector('.status-text');
+        handleToggleStatus(toggle.dataset.examId, toggle.checked, statusText);
+      }
+    });
+
+    backToExamsBtn.addEventListener('click', () => {
+      submissionsView.style.display = 'none';
+      examsView.style.display = 'block';
+    });
+
+    checkLogin();
+  </script>
 </body>
 </html>
