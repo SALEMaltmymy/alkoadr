@@ -7,116 +7,62 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand: #1e88e5; --brand-dark: #1565c0;
-      --bg: #f4f7f9; --card-bg: #ffffff;
-      --shadow: 0 8px 25px rgba(0,0,0,.08);
-      --ink: #0f172a; --muted: #6b7280;
-      --border-color: #e5e7eb;
-      --danger: #ef4444; --danger-dark: #dc2626;
-      --success: #22c55e;
+      --brand: #1e88e5; --brand-dark: #1565c0; --brand-light: #e3f2fd;
+      --bg: #f4f7f9; --card-bg: #ffffff; --shadow: 0 8px 25px rgba(0,0,0,.08);
+      --ink: #0f172a; --muted: #6b7280; --border-color: #e5e7eb;
+      --danger: #ef4444; --danger-dark: #dc2626; --success: #22c55e;
     }
-    body {
-      margin: 0; font-family: "Tajawal", sans-serif;
-      background-color: var(--bg); color: var(--ink);
-    }
-    .container {
-      width: min(900px, 92%); margin: auto; padding: 20px 0;
-    }
-    .header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 15px 25px; background: var(--card-bg);
-      border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 30px;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); line-height: 1.6; }
+    .container { width: min(900px, 92%); margin: auto; padding: 20px 0; }
+    .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 15px 25px; background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 30px; }
     .header .brand { display: flex; align-items: center; gap: 15px; }
     .header .brand img { height: 50px; }
     .header .brand h1 { margin: 0; font-size: 22px; color: var(--brand-dark); }
-    .header-actions { display: flex; gap: 10px; }
-    .back-btn, .delete-btn {
-      text-decoration: none; padding: 10px 20px; border-radius: 12px;
-      font-weight: bold; transition: all 0.2s ease;
-      border: none; cursor: pointer; font-family: inherit; font-size: 14px;
-    }
-    .back-btn {
-      background-color: var(--bg); color: var(--ink);
-      border: 1px solid var(--border-color);
-    }
-    .back-btn:hover { background-color: #e2e8f0; border-color: #cbd5e1; }
-    .delete-btn { background-color: var(--danger); color: white; }
-    .delete-btn:hover { background-color: var(--danger-dark); }
-    .delete-btn:disabled { background-color: #fca5a5; cursor: not-allowed; }
-    
-    .status-card {
-      text-align: center; font-size: 18px; color: var(--muted);
-      padding: 60px 20px; background: var(--card-bg);
-      border-radius: 18px; box-shadow: var(--shadow);
-    }
-    .status-card.error { color: var(--danger-dark); }
-    
-    .details-card {
-      background: var(--card-bg); border-radius: 18px;
-      box-shadow: var(--shadow); overflow: hidden;
-      animation: fade-up 0.6s ease;
-    }
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .back-btn { text-decoration: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; transition: all 0.2s ease; border: 1px solid var(--border-color); background-color: var(--bg); color: var(--ink); }
+    .back-btn:hover { background-color: #e2e8f0; }
+    .status-card { text-align: center; font-size: 18px; color: var(--muted); padding: 60px 20px; background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); }
+    .details-card { background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; animation: fade-up 0.6s ease; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .student-info { padding: 30px; border-bottom: 1px solid var(--border-color); }
-    .student-info h2 {
-      font-size: 24px; color: var(--brand-dark); margin-top: 0;
-      margin-bottom: 25px; padding-bottom: 15px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .info-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
+    .student-info h2 { font-size: 24px; color: var(--brand-dark); margin-top: 0; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
     .info-item dt { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
-    .info-item dd {
-      margin: 0; font-size: 16px; font-weight: 500;
-      background: var(--bg); padding: 10px; border-radius: 8px;
-    }
+    .info-item dd { margin: 0; font-size: 16px; font-weight: 500; background: var(--bg); padding: 10px; border-radius: 8px; word-break: break-all; }
     #answers-container { padding: 30px; }
-    .answer-block { margin-bottom: 25px; }
-    .answer-block:last-child { margin-bottom: 0; }
-    .answer-block h3 { margin-top: 0; font-size: 18px; color: var(--ink); }
-    .answer-block .answer-text {
-      background: var(--bg); padding: 20px; border-radius: 12px;
-      line-height: 1.8; font-size: 16px; white-space: pre-wrap;
-      border: 1px solid var(--border-color);
-    }
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      display: none; justify-content: center; align-items: center; z-index: 1000;
-      backdrop-filter: blur(5px); animation: fadeIn 0.3s ease;
-    }
-    .modal-box {
-      background: white; padding: 30px; border-radius: 16px;
-      width: min(400px, 90%); text-align: center;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      animation: slideUp 0.4s ease;
-    }
-    .modal-box h3 { margin-top: 0; font-size: 22px; }
+    .answer-block { margin-bottom: 30px; }
+    .answer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+    .answer-header h3 { margin: 0; font-size: 18px; color: var(--ink); }
+    .word-count-badge { background-color: var(--brand-light); color: var(--brand-dark); padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+    .answer-text { background: var(--bg); padding: 20px; border-radius: 12px; line-height: 1.8; font-size: 16px; white-space: pre-wrap; border: 1px solid var(--border-color); }
+    #review-btn { padding: 10px 20px; border-radius: 12px; font-weight: bold; transition: all 0.2s ease; border: 1px solid; cursor: pointer; font-family: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+    #review-btn.reviewed { background-color: var(--success); color: white; border-color: var(--success); }
+    #review-btn.not-reviewed { background-color: transparent; color: var(--ink); border-color: var(--border-color); }
+    #review-btn svg { width: 18px; height: 18px; }
+    
+    /* ✅ قسم الحذف الجديد */
+    .danger-zone { margin-top: 30px; padding: 25px; border: 1px solid var(--danger); background-color: #fee2e2; border-radius: 16px; text-align: center; }
+    .danger-zone h3 { margin-top: 0; color: var(--danger-dark); }
+    .danger-zone p { color: var(--muted); max-width: 500px; margin: 10px auto 20px; }
+    .delete-btn { background-color: var(--danger); color: white; padding: 12px 28px; font-size: 16px; }
+    .delete-btn:hover { background-color: var(--danger-dark); }
+    .delete-btn:disabled { background-color: #fca5a5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .delete-btn svg { width: 20px; height: 20px; stroke: white; }
+    
+    /* نافذة تأكيد الحذف */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
+    .modal-box { background: white; padding: 30px; border-radius: 16px; width: min(400px, 90%); text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: slideUp 0.4s ease; }
+    .modal-box h3 { margin-top: 0; font-size: 22px; color: var(--danger-dark); }
     .modal-box p { color: var(--muted); margin-bottom: 25px; }
     .modal-actions { display: flex; gap: 10px; justify-content: center; }
-    .modal-actions button {
-      padding: 10px 20px; border-radius: 10px; font-weight: bold;
-      border: none; cursor: pointer; font-family: inherit; font-size: 15px;
-      flex-grow: 1;
-    }
+    .modal-actions button { padding: 10px 20px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: inherit; font-size: 15px; flex-grow: 1; }
     #confirm-delete-btn { background-color: var(--danger); color: white; }
     #cancel-delete-btn { background-color: var(--border-color); color: var(--ink); }
-    #toast-container {
-      position: fixed; bottom: 20px; left: 20px; z-index: 2000;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .toast {
-      padding: 15px 25px; border-radius: 12px; color: white;
-      font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-      opacity: 0; transform: translateY(20px);
-      transition: all 0.4s ease;
-    }
+    
+    /* إشعارات التوست */
+    #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .toast { padding: 15px 25px; border-radius: 12px; color: white; font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.4s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.success { background-color: var(--success); }
     .toast.error { background-color: var(--danger); }
@@ -131,27 +77,26 @@
       <div class="brand"><img src="tbok.png" alt="شعار جامعة تبوك"><h1>تفاصيل الإجابة</h1></div>
       <div class="header-actions">
         <a href="admin.html" class="back-btn">→ العودة للوحة التحكم</a>
-        <button id="delete-btn" class="delete-btn" disabled>حذف الإجابة</button>
       </div>
     </header>
     
     <main id="page-wrapper">
-        <div id="loader" class="status-card"><p>جاري تحميل تفاصيل الإجابة...</p></div>
-        <div id="error-card" class="status-card error" style="display: none;"><p>حدث خطأ ما.</p></div>
+        <div id="loader" class="status-card"><p>جاري تحميل التفاصيل...</p></div>
+        <div id="error-card" class="status-card" style="display: none;"><p>حدث خطأ ما.</p></div>
         
-        <div id="content" style="display: none;" class="details-card">
-          <div class="student-info">
-            <h2>بيانات الطالب</h2>
-            <dl class="info-grid">
-              <div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div>
-              <div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div>
-              <div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div>
-              <div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div>
-              <div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div>
-            </dl>
+        <div id="content" style="display: none;">
+          <div class="details-card">
+            <div class="student-info"><h2>بيانات الطالب</h2><dl class="info-grid"><div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div><div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div><div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div><div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div><div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div></dl></div>
+            <div id="answers-container"></div>
           </div>
-          <div id="answers-container">
-            </div>
+          <div class="danger-zone">
+            <h3>منطقة الإجراءات الدائمة</h3>
+            <p>حذف هذه الإجابة هو إجراء نهائي لا يمكن التراجع عنه.</p>
+            <button id="delete-btn" class="delete-btn" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>حذف الإجابة</span>
+            </button>
+          </div>
         </div>
     </main>
   </div>
@@ -159,7 +104,7 @@
   <div id="delete-modal" class="modal-overlay">
     <div class="modal-box">
         <h3>تأكيد الحذف</h3>
-        <p>هل أنت متأكد من رغبتك في حذف هذه الإجابة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <p>هل أنت متأكد من رغبتك في حذف هذه الإجابة بشكل نهائي؟</p>
         <div class="modal-actions">
             <button id="cancel-delete-btn">إلغاء</button>
             <button id="confirm-delete-btn">نعم، قم بالحذف</button>
@@ -171,17 +116,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
-      authDomain: "database-506.firebaseapp.com",
-      projectId: "database-506",
-      storageBucket: "database-506.firebasestorage.app",
-      messagingSenderId: "926446561022",
-      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
@@ -190,6 +127,7 @@
     const content = document.getElementById('content');
     const errorCard = document.getElementById('error-card');
     const errorCardText = errorCard.querySelector('p');
+    const headerActions = document.querySelector('.header-actions');
     const deleteBtn = document.getElementById('delete-btn');
     const deleteModal = document.getElementById('delete-modal');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
@@ -211,58 +149,71 @@
         setTimeout(() => {
             toast.classList.remove('show');
             toast.addEventListener('transitionend', () => toast.remove());
-        }, 4000);
+        }, 3000);
     }
     
+    function updateReviewButton(button, isReviewed) {
+        button.dataset.isReviewed = isReviewed;
+        if (isReviewed) {
+            button.className = 'reviewed';
+            button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> تمت المراجعة`;
+        } else {
+            button.className = 'not-reviewed';
+            button.innerHTML = `وضع علامة كمُراجَع`;
+        }
+    }
+
+    async function handleReviewStatusChange(button) {
+        const currentStatus = button.dataset.isReviewed === 'true';
+        const newStatus = !currentStatus;
+        button.disabled = true;
+        const docRef = doc(db, "Submissions", currentDocId);
+        try {
+            await updateDoc(docRef, { isReviewed: newStatus });
+            updateReviewButton(button, newStatus);
+        } catch (error) { console.error("Error updating review status:", error); alert('حدث خطأ أثناء تحديث حالة المراجعة.'); } 
+        finally { button.disabled = false; }
+    }
+
     async function fetchSubmissionDetails(docId) {
         displayState('loading');
         try {
             const docRef = doc(db, "Submissions", docId);
             const docSnap = await getDoc(docRef);
-
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                
                 document.getElementById('student-name').textContent = data.name || 'غير متوفر';
                 document.getElementById('student-id').textContent = data.idNumber || 'غير متوفر';
                 document.getElementById('student-phone').textContent = data.phone || 'غير متوفر';
                 document.getElementById('student-email').textContent = data.email || 'غير متوفر';
-                
-                if (data.submissionTime?.toDate) {
-                    document.getElementById('submission-timestamp').textContent = data.submissionTime.toDate().toLocaleString('ar-SA', { dateStyle: 'long', timeStyle: 'short' });
-                } else {
-                    document.getElementById('submission-timestamp').textContent = 'غير متوفر';
-                }
+                document.getElementById('submission-timestamp').textContent = data.submissionTime?.toDate() ? data.submissionTime.toDate().toLocaleString('ar-SA', { dateStyle: 'long', timeStyle: 'short' }) : 'غير متوفر';
                 
                 const answersContainer = document.getElementById('answers-container');
-                answersContainer.innerHTML = ''; 
+                answersContainer.innerHTML = '';
                 if (data.answers && Array.isArray(data.answers)) {
                     data.answers.forEach((item, index) => {
                         const answerBlock = document.createElement('div');
                         answerBlock.className = 'answer-block';
-                        answerBlock.innerHTML = `
-                            <h3>السؤال ${index + 1}: ${item.question}</h3>
-                            <div class="answer-text">${(item.answer || "").replace(/\n/g, '<br>') || '<em>لم تتم الإجابة.</em>'}</div>
-                            <small style="color: var(--muted); margin-top: 5px; display: block;">عدد الكلمات: ${item.wordCount}</small>
-                        `;
+                        answerBlock.innerHTML = `<div class="answer-header"><h3>السؤال ${index + 1}: ${item.question}</h3><span class="word-count-badge">عدد الكلمات: ${item.wordCount}</span></div><div class="answer-text">${(item.answer || "").replace(/\n/g, '<br>') || '<em>لم تتم الإجابة.</em>'}</div>`;
                         answersContainer.appendChild(answerBlock);
                     });
                 }
+                const reviewBtn = document.createElement('button');
+                reviewBtn.id = 'review-btn';
+                updateReviewButton(reviewBtn, data.isReviewed || false);
+                reviewBtn.addEventListener('click', () => handleReviewStatusChange(reviewBtn));
+                headerActions.insertBefore(reviewBtn, headerActions.firstChild);
                 
                 displayState('success');
-            } else {
-                displayState('error', 'عذراً، هذه الإجابة غير موجودة. ربما تم حذفها.');
-            }
-        } catch (error) {
-            console.error("Error fetching document:", error);
-            displayState('error', 'حدث خطأ فني أثناء جلب البيانات.');
-        }
+                deleteBtn.disabled = false;
+            } else { displayState('error', 'عذراً، هذه الإجابة غير موجودة. ربما تم حذفها.'); }
+        } catch (error) { console.error("Error fetching document:", error); displayState('error', 'حدث خطأ فني أثناء جلب البيانات.'); }
     }
 
     async function executeDelete() {
         if (!currentDocId) return;
-        deleteBtn.disabled = true;
-        deleteBtn.textContent = 'جاري الحذف...';
+        confirmDeleteBtn.disabled = true;
+        confirmDeleteBtn.innerHTML = '<span class="loader" style="border-top-color: white;"></span>';
         try {
             await deleteDoc(doc(db, "Submissions", currentDocId));
             showToast('✅ تم حذف الإجابة بنجاح.', 'success');
@@ -270,31 +221,25 @@
         } catch (error) {
             console.error("Error deleting document:", error);
             showToast('❌ حدث خطأ أثناء الحذف.', 'error');
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = 'حذف الإجابة';
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.textContent = 'نعم، قم بالحذف';
         }
     }
 
     function initializePage() {
         const urlParams = new URLSearchParams(window.location.search);
         currentDocId = urlParams.get('id');
-
         if (currentDocId) {
             fetchSubmissionDetails(currentDocId);
         } else {
-            displayState('error', 'الرابط غير صحيح. يرجى التأكد من أن الرابط يحتوي على معرّف الإجابة.');
+            displayState('error', 'الرابط غير صحيح أو لا يحتوي على معرّف الإجابة.');
         }
-
         deleteBtn.addEventListener('click', () => deleteModal.style.display = 'flex');
         cancelDeleteBtn.addEventListener('click', () => deleteModal.style.display = 'none');
-        confirmDeleteBtn.addEventListener('click', () => {
-            deleteModal.style.display = 'none';
-            executeDelete();
-        });
+        confirmDeleteBtn.addEventListener('click', executeDelete);
     }
 
     initializePage();
   </script>
-
 </body>
-  </html>
+</html>
