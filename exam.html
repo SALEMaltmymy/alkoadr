@@ -136,25 +136,8 @@
         }, 4000);
     }
 
-    const updateProgress = (step) => {
-      progressBar.parentElement.style.display = 'block';
-      progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`;
-    };
-
-    const startTimer = (durationInSeconds, display, onTimeUp) => {
-        clearInterval(timerInterval);
-        let timer = durationInSeconds;
-        timerInterval = setInterval(() => {
-            let minutes = Math.floor(timer / 60).toString().padStart(2, '0');
-            let seconds = (timer % 60).toString().padStart(2, '0');
-            display.textContent = `${minutes}:${seconds}`;
-            if (--timer < 0) {
-                clearInterval(timerInterval);
-                onTimeUp();
-            }
-        }, 1000);
-    };
-
+    const updateProgress = (step) => { progressBar.parentElement.style.display = 'block'; progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`; };
+    const startTimer = (durationInSeconds, display, onTimeUp) => { clearInterval(timerInterval); let timer = durationInSeconds; timerInterval = setInterval(() => { let minutes = Math.floor(timer / 60).toString().padStart(2, '0'); let seconds = (timer % 60).toString().padStart(2, '0'); display.textContent = `${minutes}:${seconds}`; if (--timer < 0) { clearInterval(timerInterval); onTimeUp(); } }, 1000); };
     const showStep = (stepNumber) => {
       document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
       const stepToShow = document.querySelector(`.step[data-step="${stepNumber}"]`);
@@ -162,30 +145,21 @@
         stepToShow.classList.add("active");
         updateProgress(stepNumber);
         if (examConfig.timerMode === 'individual' && stepNumber > 3) {
-            const questionIndex = stepNumber - 4;
-            const question = examConfig.questions[questionIndex];
+            const questionIndex = stepNumber - 4; const question = examConfig.questions[questionIndex];
             const timerSpan = stepToShow.querySelector('.timer-span');
-            const onTimeUp = () => {
-                stepToShow.querySelector('textarea').disabled = true;
-                stepToShow.querySelector('button[data-next], button[type="submit"]').click();
-            };
+            const onTimeUp = () => { stepToShow.querySelector('textarea').disabled = true; stepToShow.querySelector('button[data-next], button[type="submit"]').click(); };
             startTimer(question.duration * 60, timerSpan, onTimeUp);
         } else if (examConfig.timerMode === 'total' && stepNumber === 4 && !timerInterval) {
             const totalTimerSpan = document.getElementById('total-timer-span');
-            const onTimeUp = () => {
-                form.querySelectorAll('textarea').forEach(ta => ta.disabled = true);
-                submitExam(form.querySelector('button[type="submit"]'), examConfig.id);
-            };
+            const onTimeUp = () => { form.querySelectorAll('textarea').forEach(ta => ta.disabled = true); submitExam(form.querySelector('button[type="submit"]'), examConfig.id); };
             startTimer(examConfig.totalDuration * 60, totalTimerSpan, onTimeUp);
         }
       }
     };
-    
     const showError = (step, msg) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = msg; };
     const clearError = (step) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = ''; };
     const validateStep = (step) => {
-      clearError(step);
-      let valid = true;
+      clearError(step); let valid = true;
       if (step === 1) { if (!/^[\u0600-\u06FF\s]+$/.test(nameInput.value.trim())) { showError(1, "الاسم مطلوب باللغة العربية"); valid = false; } }
       else if (step === 2) { if (!/^\d{10}$/.test(idInput.value.trim())) { showError(2, "رقم الهوية يجب أن يتكون من 10 أرقام"); valid = false; } }
       else if (step === 3) {
@@ -194,31 +168,11 @@
       }
       return valid;
     };
-    
     const submitExam = async (submitButton, examId) => {
-        clearInterval(timerInterval);
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="loader"></span> جاري الإرسال...';
-        const answers = examConfig.questions.map((q, i) => {
-            const textarea = document.getElementById(`answer-${i}`);
-            const answerText = textarea ? textarea.value.trim() : "";
-            const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length;
-            return { question: q.text, answer: answerText, wordCount: wordCount };
-        });
-        const formData = {
-            name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(),
-            email: emailInput.value.trim(), examId: examId, answers: answers, submissionTime: serverTimestamp()
-        };
-        try {
-            await addDoc(collection(db, "Submissions"), formData);
-            examCard.style.display = 'none';
-            successMessage.style.display = 'block';
-        } catch (e) {
-            console.error("Error adding document: ", e);
-            alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.");
-            submitButton.disabled = false;
-            submitButton.textContent = "إرسال الإجابة النهائية";
-        }
+        clearInterval(timerInterval); submitButton.disabled = true; submitButton.innerHTML = '<span class="loader"></span> جاري الإرسال...';
+        const answers = examConfig.questions.map((q, i) => { const textarea = document.getElementById(`answer-${i}`); const answerText = textarea ? textarea.value.trim() : ""; const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length; return { question: q.text, answer: answerText, wordCount: wordCount }; });
+        const formData = { name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(), email: emailInput.value.trim(), examId: examId, answers: answers, submissionTime: serverTimestamp() };
+        try { await addDoc(collection(db, "Submissions"), formData); examCard.style.display = 'none'; successMessage.style.display = 'block'; } catch (e) { console.error("Error adding document: ", e); alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."); submitButton.disabled = false; submitButton.textContent = "إرسال الإجابة النهائية"; }
     };
 
     async function loadExam(examId) {
@@ -235,13 +189,8 @@
                 if (examConfig.timerMode === 'total') { document.getElementById('total-timer-container').style.display = 'block'; }
 
                 examConfig.questions.forEach((q, i) => {
-                    const stepNum = i + 4;
-                    const isLast = (i === examConfig.questions.length - 1);
-                    const isFirstQuestion = (i === 0);
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'step';
-                    stepDiv.dataset.step = stepNum;
-                    
+                    const stepNum = i + 4; const isLast = (i === examConfig.questions.length - 1); const isFirstQuestion = (i === 0);
+                    const stepDiv = document.createElement('div'); stepDiv.className = 'step'; stepDiv.dataset.step = stepNum;
                     const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
                     const prevButtonHTML = !isFirstQuestion ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>` : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
                     const nextButtonHTML = isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
@@ -254,27 +203,39 @@
                     const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
                     const targetWordCount = q.wordCount;
                     
-                    textarea.lastValue = textarea.value;
-                    textarea.lastCheckTime = Date.now();
+                    textarea.lastValue = '';
+                    textarea.charTimestamps = [];
+                    textarea.lastWordCount = 0;
+                    textarea.lastWordTime = Date.now();
                     
                     textarea.addEventListener('input', () => {
                         const currentTime = Date.now();
-                        const timeDiff = currentTime - textarea.lastCheckTime;
-                        const charsAdded = textarea.value.length - textarea.lastValue.length;
+                        const currentValue = textarea.value;
 
-                        if (timeDiff < 500 && charsAdded > 7) { // 7 chars in 0.5 seconds
+                        // ✅ النظام 1: منع اللصق عبر سرعة كتابة الأحرف
+                        textarea.charTimestamps.push(currentTime);
+                        textarea.charTimestamps = textarea.charTimestamps.filter(t => currentTime - t < 1000); // Keep timestamps from the last second
+                        if (textarea.charTimestamps.length > 5) {
                             textarea.value = textarea.lastValue;
                             showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
-                            return;
+                            return; // Stop processing
                         }
                         
-                        if (charsAdded > 0) {
-                           textarea.lastCheckTime = currentTime;
-                        }
-                        textarea.lastValue = textarea.value;
-
-                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
+                        // ✅ النظام 2: منع اللصق عبر المسافة بين الكلمات
+                        const words = currentValue.trim().split(/\s+/).filter(w => w.length > 0);
                         let currentWordCount = words.length;
+
+                        if (currentWordCount > textarea.lastWordCount) { // A new word was added
+                            const timeSinceLastWord = currentTime - textarea.lastWordTime;
+                            if (timeSinceLastWord < 250 && currentWordCount > 1) { // less than quarter second between words
+                                textarea.value = textarea.lastValue;
+                                showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
+                                return; // Stop processing
+                            }
+                            textarea.lastWordTime = currentTime;
+                        }
+
+                        // ✅ النظام 3: منع تجاوز عدد الكلمات
                         if (currentWordCount > targetWordCount) {
                             const trimmedWords = words.slice(0, targetWordCount);
                             textarea.value = trimmedWords.join(' ') + ' ';
@@ -286,6 +247,9 @@
                         } else {
                             wordLimitToastShown[i] = false;
                         }
+                        
+                        textarea.lastValue = textarea.value;
+                        textarea.lastWordCount = currentWordCount;
                         
                         wordCountSpan.textContent = currentWordCount;
                         const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
@@ -303,7 +267,7 @@
     form.addEventListener('paste', (e) => {
         if (e.target.tagName === 'TEXTAREA') {
             e.preventDefault();
-            showToast('رصد محاولة غش: اللصق غير مسموح به.');
+            showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
         }
     });
 
