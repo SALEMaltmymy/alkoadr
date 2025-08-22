@@ -10,9 +10,10 @@
       --brand: #1e88e5; --brand-dark: #1565c0; --brand-light: #e3f2fd;
       --bg: #f4f7f9; --card-bg: #ffffff; --shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
       --ink: #0f172a; --muted: #6b7280; --border-color: #e5e7eb;
-      --error: #d32f2f; --success: #22c55e;
+      --error: #ef4444; --success: #22c55e;
     }
     *, *::before, *::after { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
     body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 0; }
     .container { width: min(650px, 92%); margin: auto; }
     .site-header { text-align: center; margin-bottom: 25px; }
@@ -47,6 +48,12 @@
     .step-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
     .btn-prev { background: var(--bg); color: var(--ink); border: 1px solid var(--border-color); }
     .btn-prev:hover { background-color: #e2e8f0; box-shadow: none; transform: none; }
+    
+    /* ✅ إشعارات التوست الجديدة */
+    #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .toast { padding: 15px 25px; border-radius: 12px; color: white; font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.4s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background-color: var(--error); }
     
     @media (max-width: 600px) {
         .card { padding: 20px; }
@@ -91,6 +98,8 @@
     
     <footer class="credit"><p>اعداد/المهندس خالد الغامدي</p></footer>
   </div>
+  
+  <div id="toast-container"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -112,6 +121,19 @@
     let timerInterval = null;
     let TOTAL_STEPS = 3;
     let examConfig = {};
+
+    function showToast(message, type = 'error') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 3000);
+    }
 
     const updateProgress = (step) => {
       progressBar.parentElement.style.display = 'block';
@@ -218,12 +240,11 @@
                     const stepDiv = document.createElement('div');
                     stepDiv.className = 'step';
                     stepDiv.dataset.step = stepNum;
-                    const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
                     
+                    const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
                     const prevButtonHTML = !isFirstQuestion 
                         ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>`
-                        : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`; // Special text for first question
-
+                        : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
                     const nextButtonHTML = isLast 
                         ? '<button type="submit">إرسال الإجابة النهائية</button>' 
                         : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
@@ -237,16 +258,33 @@
                             <div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div>
                             <div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div>
                         </div>
-                        <div class="step-actions">
-                            ${prevButtonHTML}
-                            ${nextButtonHTML}
-                        </div>`;
+                        <div class="step-actions">${prevButtonHTML}${nextButtonHTML}</div>`;
                     form.appendChild(stepDiv);
                     
                     const textarea = stepDiv.querySelector(`#answer-${i}`);
                     const wordCountSpan = stepDiv.querySelector(`#wordCount-${i}`);
                     const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
+                    
+                    let lastValidAnswer = textarea.value;
+                    let lastInputTime = Date.now();
+                    let charCountThisInterval = 0;
+                    const RATE_LIMIT_CHARS = 15;
+                    
                     textarea.addEventListener('input', () => {
+                        const currentTime = Date.now();
+                        const timeDiff = currentTime - lastInputTime;
+                        const currentValue = textarea.value;
+                        const charsAdded = currentValue.length - lastValidAnswer.length;
+
+                        if (charsAdded > 0) {
+                            if (timeDiff > 1000) { charCountThisInterval = 0; lastInputTime = currentTime; }
+                            charCountThisInterval += charsAdded;
+                            if (charCountThisInterval > RATE_LIMIT_CHARS) {
+                                textarea.value = lastValidAnswer;
+                                showToast('رصد محاولة غش: سرعة الكتابة عالية جدًا');
+                            } else { lastValidAnswer = currentValue; }
+                        } else { lastValidAnswer = currentValue; }
+                        
                         const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
                         wordCountSpan.textContent = words.length;
                         const progress = Math.min((words.length / q.wordCount) * 100, 100);
@@ -261,25 +299,29 @@
         } catch (error) { console.error("Error fetching exam:", error); loadingDiv.innerHTML = '<h3 style="color:var(--error);">حدث خطأ أثناء تحميل الاختبار.</h3><p>يرجى تحديث الصفحة.</p>'; }
     }
 
+    form.addEventListener('paste', (e) => {
+        if (e.target.tagName === 'TEXTAREA') {
+            e.preventDefault();
+            showToast('رصد محاولة غش: اللصق غير مسموح به.');
+        }
+    });
+
     form.addEventListener('click', (e) => {
         const nextBtn = e.target.closest('button[data-next]');
         const prevBtn = e.target.closest('button[data-prev]');
         if (nextBtn) { 
             const currentStep = parseInt(nextBtn.closest('.step').dataset.step);
-            if (validateStep(currentStep)) {
-                showStep(parseInt(nextBtn.dataset.next));
-            }
+            if (validateStep(currentStep)) { showStep(parseInt(nextBtn.dataset.next)); }
         }
-        if (prevBtn) {
-            showStep(parseInt(prevBtn.dataset.prev));
-        }
+        if (prevBtn) { showStep(parseInt(prevBtn.dataset.prev)); }
     });
 
     const urlParams = new URLSearchParams(window.location.search);
     const examId = urlParams.get('id');
     form.addEventListener('submit', (e) => { e.preventDefault(); submitExam(e.target.querySelector('button[type="submit"]'), examId); });
+    
     if (examId) { loadExam(examId); } 
     else { document.getElementById('loading-exam').innerHTML = '<h3 style="color:var(--error);">خطأ: رابط الاختبار غير مكتمل.</h3><p>يجب أن يحتوي الرابط على ID الاختبار للبدء.</p>'; }
   </script>
 </body>
-</html>
+  </html>
