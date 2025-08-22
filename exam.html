@@ -53,6 +53,7 @@
     .toast { padding: 15px 25px; border-radius: 12px; color: white; font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.4s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.error { background-color: var(--error); }
+    .toast.success { background-color: var(--success); }
     
     @media (max-width: 600px) {
         .card { padding: 20px; }
@@ -120,6 +121,7 @@
     let timerInterval = null;
     let TOTAL_STEPS = 3;
     let examConfig = {};
+    let wordLimitToastShown = {};
 
     function showToast(message, type = 'error') {
         const toastContainer = document.getElementById('toast-container');
@@ -241,52 +243,35 @@
                     stepDiv.dataset.step = stepNum;
                     
                     const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
-                    const prevButtonHTML = !isFirstQuestion 
-                        ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>`
-                        : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
-                    const nextButtonHTML = isLast 
-                        ? '<button type="submit">إرسال الإجابة النهائية</button>' 
-                        : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
+                    const prevButtonHTML = !isFirstQuestion ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>` : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
+                    const nextButtonHTML = isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
 
-                    stepDiv.innerHTML = `
-                        <h3>السؤال ${i + 1} / ${examConfig.questions.length}</h3>
-                        ${individualTimerHTML}
-                        <p style="font-size: 1.1em; line-height: 1.7;">${q.text}</p>
-                        <textarea id="answer-${i}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea>
-                        <div class="counter-wrapper">
-                            <div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div>
-                            <div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div>
-                        </div>
-                        <div class="step-actions">${prevButtonHTML}${nextButtonHTML}</div>`;
+                    stepDiv.innerHTML = `<h3>السؤال ${i + 1} / ${examConfig.questions.length}</h3>${individualTimerHTML}<p style="font-size: 1.1em; line-height: 1.7;">${q.text}</p><textarea id="answer-${i}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea><div class="counter-wrapper"><div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div><div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div></div><div class="step-actions">${prevButtonHTML}${nextButtonHTML}</div>`;
                     form.appendChild(stepDiv);
                     
                     const textarea = stepDiv.querySelector(`#answer-${i}`);
                     const wordCountSpan = stepDiv.querySelector(`#wordCount-${i}`);
                     const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
-                    
-                    let lastValidAnswer = textarea.value;
-                    let lastInputTime = Date.now();
-                    let charCountThisInterval = 0;
-                    const RATE_LIMIT_CHARS = 8; // ✅ تم التغيير إلى 10
+                    const targetWordCount = q.wordCount;
                     
                     textarea.addEventListener('input', () => {
-                        const currentTime = Date.now();
-                        const timeDiff = currentTime - lastInputTime;
-                        const currentValue = textarea.value;
-                        const charsAdded = currentValue.length - lastValidAnswer.length;
+                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
+                        let currentWordCount = words.length;
 
-                        if (charsAdded > 0) {
-                            if (timeDiff > 1000) { charCountThisInterval = 0; lastInputTime = currentTime; }
-                            charCountThisInterval += charsAdded;
-                            if (charCountThisInterval > RATE_LIMIT_CHARS) {
-                                textarea.value = lastValidAnswer;
-                                showToast('رصد محاولة غش:');
-                            } else { lastValidAnswer = currentValue; }
-                        } else { lastValidAnswer = currentValue; }
+                        if (currentWordCount > targetWordCount) {
+                            const trimmedWords = words.slice(0, targetWordCount);
+                            textarea.value = trimmedWords.join(' ') + ' ';
+                            currentWordCount = targetWordCount;
+                            if (!wordLimitToastShown[i]) {
+                                showToast('لقد اكتمل عدد الكلمات المطلوب', 'success');
+                                wordLimitToastShown[i] = true;
+                            }
+                        } else {
+                            wordLimitToastShown[i] = false;
+                        }
                         
-                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-                        wordCountSpan.textContent = words.length;
-                        const progress = Math.min((words.length / q.wordCount) * 100, 100);
+                        wordCountSpan.textContent = currentWordCount;
+                        const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
                         wordProgressBar.style.width = `${progress}%`;
                         wordProgressBar.classList.toggle('completed', progress >= 100);
                     });
