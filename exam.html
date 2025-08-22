@@ -204,38 +204,24 @@
                     const targetWordCount = q.wordCount;
                     
                     textarea.lastValue = '';
-                    textarea.charTimestamps = [];
-                    textarea.lastWordCount = 0;
-                    textarea.lastWordTime = Date.now();
                     
                     textarea.addEventListener('input', () => {
-                        const currentTime = Date.now();
                         const currentValue = textarea.value;
+                        const charsAdded = currentValue.length - textarea.lastValue.length;
 
-                        // ✅ النظام 1: منع اللصق عبر سرعة كتابة الأحرف
-                        textarea.charTimestamps.push(currentTime);
-                        textarea.charTimestamps = textarea.charTimestamps.filter(t => currentTime - t < 1000); // Keep timestamps from the last second
-                        if (textarea.charTimestamps.length > 5) {
+                        // ✅ النظام الجديد المعتمد على "الدفعة"
+                        // أي إدخال لأكثر من 3 حروف في مرة واحدة يعتبر لصقًا
+                        if (charsAdded > 3) {
                             textarea.value = textarea.lastValue;
                             showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
-                            return; // Stop processing
+                            return; // أوقف باقي العمليات
                         }
                         
-                        // ✅ النظام 2: منع اللصق عبر المسافة بين الكلمات
+                        // النظام القديم للسرعة تم استبداله بما هو أفضل وأبسط
+                        
                         const words = currentValue.trim().split(/\s+/).filter(w => w.length > 0);
                         let currentWordCount = words.length;
 
-                        if (currentWordCount > textarea.lastWordCount) { // A new word was added
-                            const timeSinceLastWord = currentTime - textarea.lastWordTime;
-                            if (timeSinceLastWord < 250 && currentWordCount > 1) { // less than quarter second between words
-                                textarea.value = textarea.lastValue;
-                                showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
-                                return; // Stop processing
-                            }
-                            textarea.lastWordTime = currentTime;
-                        }
-
-                        // ✅ النظام 3: منع تجاوز عدد الكلمات
                         if (currentWordCount > targetWordCount) {
                             const trimmedWords = words.slice(0, targetWordCount);
                             textarea.value = trimmedWords.join(' ') + ' ';
@@ -249,7 +235,6 @@
                         }
                         
                         textarea.lastValue = textarea.value;
-                        textarea.lastWordCount = currentWordCount;
                         
                         wordCountSpan.textContent = currentWordCount;
                         const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
