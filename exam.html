@@ -133,7 +133,7 @@
         setTimeout(() => {
             toast.classList.remove('show');
             toast.addEventListener('transitionend', () => toast.remove());
-        }, 3000);
+        }, 4000);
     }
 
     const updateProgress = (step) => {
@@ -254,26 +254,25 @@
                     const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
                     const targetWordCount = q.wordCount;
                     
-                    // ✅ نظام منع الغش المتقدم لكل مربع نص
-                    textarea.lastValidValue = textarea.value;
-                    textarea.lastInputTime = Date.now();
+                    textarea.lastValue = textarea.value;
+                    textarea.lastCheckTime = Date.now();
                     
                     textarea.addEventListener('input', () => {
-                        // 1. نظام كشف السرعة
                         const currentTime = Date.now();
-                        const timeDiff = currentTime - textarea.lastInputTime;
-                        const charsAdded = textarea.value.length - textarea.lastValidValue.length;
+                        const timeDiff = currentTime - textarea.lastCheckTime;
+                        const charsAdded = textarea.value.length - textarea.lastValue.length;
 
-                        if (timeDiff < 100 && charsAdded > 5) { // أكثر من 5 حروف في أقل من 0.1 ثانية
-                            textarea.value = textarea.lastValidValue;
-                            showToast('رصد محاولة غش: إدخال سريع جدًا للنص');
-                            return; // أوقف باقي العمليات
+                        if (timeDiff < 500 && charsAdded > 7) { // 7 chars in 0.5 seconds
+                            textarea.value = textarea.lastValue;
+                            showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
+                            return;
                         }
                         
-                        textarea.lastValidValue = textarea.value;
-                        textarea.lastInputTime = currentTime;
+                        if (charsAdded > 0) {
+                           textarea.lastCheckTime = currentTime;
+                        }
+                        textarea.lastValue = textarea.value;
 
-                        // 2. نظام حد الكلمات
                         const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
                         let currentWordCount = words.length;
                         if (currentWordCount > targetWordCount) {
@@ -288,7 +287,6 @@
                             wordLimitToastShown[i] = false;
                         }
                         
-                        // 3. تحديث العداد وشريط التقدم
                         wordCountSpan.textContent = currentWordCount;
                         const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
                         wordProgressBar.style.width = `${progress}%`;
