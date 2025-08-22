@@ -13,6 +13,7 @@
       --error: #ef4444; --error-dark: #dc2626; --success: #22c55e;
     }
     *, *::before, *::after { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
     body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); line-height: 1.6; }
     .container { width: min(1200px, 94%); margin: 20px auto; padding: 20px 0; }
     
@@ -49,7 +50,8 @@
     .student-profile .info h3 { margin: 0 0 4px 0; font-size: 1.1em; color: var(--ink); }
     .student-profile .info p { margin: 0; color: var(--muted); font-size: 0.9em; }
     
-    input, textarea { border: 1.5px solid var(--border-color); border-radius: 14px; font-family: inherit; font-size: 15px; padding: 14px; width: 100%; margin-bottom: 12px;}
+    input, textarea, label { display: block; width: 100%; padding: 14px; margin-bottom: 12px; border: 1.5px solid var(--border-color); border-radius: 14px; font-family: inherit; font-size: 15px; }
+    label { border: none; padding: 0 5px 5px; margin-bottom: 0; font-weight: 500; color: var(--muted); }
     button, .btn-as-link { background: var(--brand); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
     button:hover, .btn-as-link:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     #show-create-exam-modal-btn { padding: 12px 24px; font-size: 16px; }
@@ -60,7 +62,7 @@
     @keyframes rotation { to { transform: rotate(360deg); } }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px); }
     .modal-content { background: #fff; padding: 30px; border-radius: 20px; width: min(650px, 92%); max-height: 90vh; overflow-y: auto; animation: modal-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes modal-fade-in { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes modal-fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; }
     .close-btn { font-size: 28px; line-height: 1; border: none; background: none; cursor: pointer; }
     .question-block { border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-top: 15px; background: #fafafa; }
@@ -78,6 +80,14 @@
     .timer-options { border: 1px solid var(--border-color); border-radius: 14px; padding: 15px; margin-bottom: 20px; }
     .timer-options label { display: inline-flex; align-items: center; gap: 8px; width: auto; margin-bottom: 0; font-weight: normal; font-size: 15px; }
     input[type="radio"] { width: auto; }
+    .notification { padding: 15px; border-radius: 12px; color: #fff; text-align: center; margin-bottom: 15px; display: none; animation: modal-fade-in 0.3s; }
+    .notification.success { background-color: var(--success); }
+    .notification.error { background-color: var(--error); }
+    .view-wrapper { position: relative; }
+    .view { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+    .view.hidden { opacity: 0; transform: translateX(-20px); pointer-events: none; position: absolute; width: 100%; top: 0; }
+    .card, .submission-card { opacity: 0; animation: card-fade-in 0.5s ease-out forwards; }
+    @keyframes card-fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 850px) {
       #exams-list-container { grid-template-columns: 1fr; }
@@ -102,12 +112,12 @@
             <h1>جامعة تبوك</h1>
             <h2>لوحة تحكم كوادر السلامة والصحة المهنية</h2>
         </header>
-        <main>
-            <div id="exams-view">
+        <main class="view-wrapper">
+            <div id="exams-view" class="view">
                 <div class="page-header"><h1>الاختبارات المنشأة</h1><button id="show-create-exam-modal-btn">+ إنشاء اختبار جديد</button></div>
                 <div id="exams-list-container"></div>
             </div>
-            <div id="submissions-view" style="display: none;">
+            <div id="submissions-view" class="view hidden">
                 <div class="page-header"><h2 id="submissions-title"></h2><button id="back-to-exams-btn" class="btn-secondary">&larr; العودة</button></div>
                 <div id="submissions-list-container"></div>
             </div>
@@ -118,7 +128,7 @@
     <div id="create-exam-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>إنشاء اختبار جديد</h3><button class="close-btn" data-modal-id="create-exam-modal">&times;</button></div>
-            <div id="notification-area" style="display: none;"></div>
+            <div id="notification-area"></div>
             <label for="exam-title">عنوان الاختبار</label><input type="text" id="exam-title" placeholder="مثال: اختبار السلامة المهنية - الأسبوع الأول">
             <div class="timer-options">
                 <label style="font-weight: bold; margin-bottom: 10px; width: 100%;">نظام التوقيت:</label>
@@ -205,7 +215,7 @@
     document.querySelector('#create-exam-modal .close-btn').addEventListener('click', () => createExamModal.style.display = 'none');
 
     timerModeRadios.forEach(radio => { radio.addEventListener('change', (e) => { const isTotalMode = e.target.value === 'total'; totalDurationContainer.style.display = isTotalMode ? 'block' : 'none'; document.querySelectorAll('.duration-input-container').forEach(c => { c.style.display = isTotalMode ? 'none' : 'block'; }); }); });
-    const showNotification = (message, type) => { const notif = Object.assign(document.createElement('div'), { className: `notification ${type}`, textContent: message }); notificationArea.innerHTML = ''; notificationArea.appendChild(notif); notif.style.display = 'block'; setTimeout(() => { notif.style.display = 'none'; }, 4000); };
+    const showNotification = (message, type) => { const notif = Object.assign(document.createElement('div'), { className: `notification ${type}`, textContent: message }); notificationArea.innerHTML = ''; notificationArea.appendChild(notif); notificationArea.style.display = 'block'; setTimeout(() => { notif.style.display = 'none'; }, 4000); };
     const updateButtons = () => { removeQuestionBtn.style.display = (questionCount > 0) ? 'inline-block' : 'none'; };
     
     addQuestionBtn.addEventListener('click', () => {
@@ -221,11 +231,70 @@
     });
     
     removeQuestionBtn.addEventListener('click', () => { if (questionCount <= 0) return; document.getElementById(`q-block-${questionCount}`).remove(); questionCount--; updateButtons(); });
-    saveExamBtn.addEventListener('click', async () => { const title = examTitleInput.value.trim(); const timerMode = document.querySelector('input[name="timerMode"]:checked').value; const totalDuration = parseInt(document.getElementById('total-duration').value, 10); if (!title) { showNotification('الرجاء إدخال عنوان للاختبار', 'error'); return; } if (timerMode === 'total' && (isNaN(totalDuration) || totalDuration <= 0)) { showNotification('الرجاء إدخال مدة إجمالية صحيحة', 'error'); return; } const questions = []; let isValid = true; questionsContainer.querySelectorAll('.question-block').forEach(b => { const text = b.querySelector('[name="q-text"]').value.trim(); const wordCount = parseInt(b.querySelector('[name="q-wordcount"]').value, 10); const questionData = { text, wordCount }; if (timerMode === 'individual') { const duration = parseInt(b.querySelector('[name="q-duration"]').value, 10); if (isNaN(duration) || duration <= 0) isValid = false; questionData.duration = duration; } if (!text || isNaN(wordCount) || wordCount <= 0) isValid = false; questions.push(questionData); }); if (!isValid || questions.length === 0) { showNotification('الرجاء تعبئة جميع حقول الأسئلة بشكل صحيح', 'error'); return; } saveExamBtn.disabled = true; saveExamBtn.innerHTML = '<span class="loader"></span> حفظ...'; try { const examData = { title, questions, timerMode, isActive: false, createdAt: serverTimestamp() }; if (timerMode === 'total') { examData.totalDuration = totalDuration; } await addDoc(collection(db, "Exams"), examData); examTitleInput.value = ''; questionsContainer.innerHTML = ''; questionCount = 0; updateButtons(); createExamModal.style.display = 'none'; loadExams(); } catch (error) { showNotification('حدث خطأ أثناء الحفظ', 'error'); console.error(error); } finally { saveExamBtn.disabled = false; saveExamBtn.textContent = 'حفظ الاختبار'; } });
-
-    async function loadExams() { examsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>جاري تحميل الاختبارات...</p></div>'; try { const q = query(collection(db, "Exams"), orderBy("createdAt", "desc")); const querySnapshot = await getDocs(q); examsListContainer.innerHTML = querySnapshot.empty ? '<div class="card" style="grid-column: 1 / -1;"><p>لم يتم إنشاء أي اختبارات بعد. اضغط على "+ إنشاء اختبار جديد" للبدء.</p></div>' : ''; querySnapshot.forEach(doc => { const exam = doc.data(); const examId = doc.id; const shareableLink = `${BASE_URL}/exam.html?id=${examId}`; const card = document.createElement('div'); card.className = 'card exam-card'; card.innerHTML = `<div class="card-content"><div class="card-header"><h3>${exam.title}</h3><div class="status-control"><span class="status-text ${exam.isActive ? 'active' : 'inactive'}">${exam.isActive ? 'فعال' : 'موقوف'}</span><label class="toggle-switch"><input type="checkbox" class="toggle-status-btn" data-exam-id="${examId}" ${exam.isActive ? 'checked' : ''}><span class="slider"></span></label></div></div><p class="card-meta">(${exam.questions.length} أسئلة) &bull; ${new Date(exam.createdAt?.toDate()).toLocaleDateString('ar-SA')}</p></div><div class="card-actions"><div class="action-group"><button class="copy-link-btn" data-link="${shareableLink}">نسخ</button><button class="view-submissions-btn" data-exam-id="${examId}" data-exam-title="${exam.title}">الإجابات</button></div><button class="delete-exam-btn btn-icon" data-exam-id="${examId}" title="حذف الاختبار"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted);"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-6 5v6m4-6v6"/></svg></button></div>`; examsListContainer.appendChild(card); }); } catch (error) { console.error("Error loading exams:", error); examsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p>حدث خطأ في تحميل الاختبارات.</p></div>'; } }
     
-    async function loadSubmissions(examId, examTitle) { submissionsTitle.textContent = `إجابات اختبار: ${examTitle}`; submissionsListContainer.innerHTML = '<div class="card" style="text-align:center;"><p>جاري تحميل الإجابات...</p></div>'; try { const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc")); const querySnapshot = await getDocs(q); if (querySnapshot.empty) { submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>'; return; } submissionsListContainer.innerHTML = ''; querySnapshot.forEach(doc => { const sub = doc.data(); const subId = doc.id; const studentName = sub.name || "طالب غير معروف"; const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`; const card = document.createElement('div'); card.className = 'card submission-card'; card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`; submissionsListContainer.appendChild(card); }); } catch (error) { console.error("Error loading submissions: ", error); submissionsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات. تأكد من أن الفهرس (Index) المطلوب تم إنشاؤه في Firestore.</p></div>'; } }
+    saveExamBtn.addEventListener('click', async () => {
+        const title = examTitleInput.value.trim();
+        if (!title) { showNotification('خطأ: الرجاء إدخال عنوان للاختبار.', 'error'); return; }
+        const timerMode = document.querySelector('input[name="timerMode"]:checked').value;
+        const totalDuration = parseInt(document.getElementById('total-duration').value, 10);
+        if (timerMode === 'total' && (isNaN(totalDuration) || totalDuration <= 0)) { showNotification('خطأ: الرجاء إدخال مدة إجمالية صحيحة للاختبار.', 'error'); return; }
+        const questions = [];
+        let isValid = true;
+        questionsContainer.querySelectorAll('.question-block').forEach(b => {
+            const text = b.querySelector('[name="q-text"]').value.trim();
+            const wordCount = parseInt(b.querySelector('[name="q-wordcount"]').value, 10);
+            const questionData = { text, wordCount };
+            if (timerMode === 'individual') { const duration = parseInt(b.querySelector('[name="q-duration"]').value, 10); if (isNaN(duration) || duration <= 0) isValid = false; questionData.duration = duration; }
+            if (!text || isNaN(wordCount) || wordCount <= 0) isValid = false;
+            questions.push(questionData);
+        });
+        if (questions.length === 0) { showNotification('خطأ: يجب إضافة سؤال واحد على الأقل للاختبار.', 'error'); return; }
+        if (!isValid) { showNotification('خطأ: الرجاء تعبئة جميع حقول الأسئلة بشكل صحيح.', 'error'); return; }
+        
+        saveExamBtn.disabled = true;
+        saveExamBtn.innerHTML = '<span class="loader"></span> حفظ...';
+        try {
+            const examData = { title, questions, timerMode, isActive: false, createdAt: serverTimestamp() };
+            if (timerMode === 'total') { examData.totalDuration = totalDuration; }
+            await addDoc(collection(db, "Exams"), examData);
+            examTitleInput.value = ''; questionsContainer.innerHTML = ''; questionCount = 0;
+            updateButtons(); createExamModal.style.display = 'none'; loadExams();
+        } catch (error) { showNotification('حدث خطأ أثناء الحفظ في قاعدة البيانات.', 'error'); console.error(error); } 
+        finally { saveExamBtn.disabled = false; saveExamBtn.textContent = 'حفظ الاختبار'; }
+    });
+
+    async function loadExams() {
+        examsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>جاري تحميل الاختبارات...</p></div>';
+        try {
+            const q = query(collection(db, "Exams"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            examsListContainer.innerHTML = querySnapshot.empty ? '<div class="card" style="grid-column: 1 / -1;"><p>لم يتم إنشاء أي اختبارات بعد. اضغط على "+ إنشاء اختبار جديد" للبدء.</p></div>' : '';
+            querySnapshot.forEach((doc, index) => {
+                const exam = doc.data(); const examId = doc.id;
+                const card = document.createElement('div'); card.className = 'card exam-card';
+                card.style.animationDelay = `${index * 50}ms`;
+                card.innerHTML = `<div class="card-content"><div class="card-header"><h3>${exam.title}</h3><div class="status-control"><span class="status-text ${exam.isActive ? 'active' : 'inactive'}">${exam.isActive ? 'فعال' : 'موقوف'}</span><label class="toggle-switch"><input type="checkbox" class="toggle-status-btn" data-exam-id="${examId}" ${exam.isActive ? 'checked' : ''}><span class="slider"></span></label></div></div><p class="card-meta">(${exam.questions.length} أسئلة) &bull; ${new Date(exam.createdAt?.toDate()).toLocaleDateString('ar-SA')}</p></div><div class="card-actions"><div class="action-group"><button class="copy-link-btn" data-link="${BASE_URL}/exam.html?id=${examId}">نسخ</button><button class="view-submissions-btn" data-exam-id="${examId}" data-exam-title="${exam.title}">الإجابات</button></div><button class="delete-exam-btn btn-icon" data-exam-id="${examId}" title="حذف الاختبار"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted);"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-6 5v6m4-6v6"/></svg></button></div>`;
+                examsListContainer.appendChild(card);
+            });
+        } catch (error) { console.error("Error loading exams:", error); examsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p>حدث خطأ في تحميل الاختبارات.</p></div>'; }
+    }
+    
+    async function loadSubmissions(examId, examTitle) {
+        submissionsTitle.textContent = `إجابات اختبار: ${examTitle}`;
+        submissionsListContainer.innerHTML = '<div class="card" style="text-align:center;"><p>جاري تحميل الإجابات...</p></div>';
+        try {
+            const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"));
+            const querySnapshot = await getDocs(q);
+            submissionsListContainer.innerHTML = querySnapshot.empty ? '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>' : '';
+            querySnapshot.forEach((doc, index) => {
+                const sub = doc.data(); const subId = doc.id; const studentName = sub.name || "طالب غير معروف"; const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`;
+                const card = document.createElement('div'); card.className = 'card submission-card';
+                card.style.animationDelay = `${index * 50}ms`;
+                card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`;
+                submissionsListContainer.appendChild(card);
+            });
+        } catch (error) { console.error("Error loading submissions: ", error); submissionsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات. تأكد من أن الفهرس (Index) المطلوب تم إنشاؤه في Firestore.</p></div>'; }
+    }
 
     async function handleToggleStatus(examId, newStatus, statusTextElement) { try { await updateDoc(doc(db, "Exams", examId), { isActive: newStatus }); statusTextElement.textContent = newStatus ? 'فعال' : 'موقوف'; statusTextElement.className = `status-text ${newStatus ? 'active' : 'inactive'}`; } catch (error) { console.error("Error updating status: ", error); alert("فشل تحديث حالة الاختبار."); const checkbox = document.querySelector(`.toggle-status-btn[data-exam-id="${examId}"]`); if(checkbox) checkbox.checked = !newStatus; } }
     
@@ -250,9 +319,9 @@
     confirmDeleteBtn.addEventListener('click', executeDelete);
     cancelDeleteBtn.addEventListener('click', () => { deleteConfirmModal.style.display = 'none'; itemToDelete = null; });
 
-    examsListContainer.addEventListener('click', (e) => { const button = e.target.closest('button'); const toggle = e.target.closest('.toggle-status-btn'); if (button?.classList.contains('copy-link-btn')) { navigator.clipboard.writeText(button.dataset.link); button.textContent = 'تم النسخ!'; setTimeout(() => { button.textContent = 'نسخ'; }, 2000); } if (button?.classList.contains('view-submissions-btn')) { examsView.style.display = 'none'; submissionsView.style.display = 'block'; loadSubmissions(button.dataset.examId, button.dataset.examTitle); } if (button?.classList.contains('delete-exam-btn')) { handleDeleteExam(button.dataset.examId); } if (toggle) { const statusText = toggle.closest('.status-control').querySelector('.status-text'); handleToggleStatus(toggle.dataset.examId, toggle.checked, statusText); } });
+    examsListContainer.addEventListener('click', (e) => { const button = e.target.closest('button'); const toggle = e.target.closest('.toggle-status-btn'); if (button?.classList.contains('copy-link-btn')) { navigator.clipboard.writeText(button.dataset.link); button.textContent = 'تم النسخ!'; setTimeout(() => { button.textContent = 'نسخ'; }, 2000); } if (button?.classList.contains('view-submissions-btn')) { examsView.classList.add('hidden'); submissionsView.classList.remove('hidden'); loadSubmissions(button.dataset.examId, button.dataset.examTitle); } if (button?.classList.contains('delete-exam-btn')) { handleDeleteExam(button.dataset.examId); } if (toggle) { const statusText = toggle.closest('.status-control').querySelector('.status-text'); handleToggleStatus(toggle.dataset.examId, toggle.checked, statusText); } });
     
-    backToExamsBtn.addEventListener('click', () => { submissionsView.style.display = 'none'; examsView.style.display = 'block'; });
+    backToExamsBtn.addEventListener('click', () => { submissionsView.classList.add('hidden'); examsView.classList.remove('hidden'); });
     
     checkLogin();
   </script>
