@@ -49,7 +49,6 @@
     .btn-prev { background: var(--bg); color: var(--ink); border: 1px solid var(--border-color); }
     .btn-prev:hover { background-color: #e2e8f0; box-shadow: none; transform: none; }
     
-    /* ✅ إشعارات التوست الجديدة */
     #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
     .toast { padding: 15px 25px; border-radius: 12px; color: white; font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.4s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -268,7 +267,7 @@
                     let lastValidAnswer = textarea.value;
                     let lastInputTime = Date.now();
                     let charCountThisInterval = 0;
-                    const RATE_LIMIT_CHARS = 15;
+                    const RATE_LIMIT_CHARS = 10; // ✅ تم التغيير إلى 10
                     
                     textarea.addEventListener('input', () => {
                         const currentTime = Date.now();
@@ -285,7 +284,7 @@
                             } else { lastValidAnswer = currentValue; }
                         } else { lastValidAnswer = currentValue; }
                         
-                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
+                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
                         wordCountSpan.textContent = words.length;
                         const progress = Math.min((words.length / q.wordCount) * 100, 100);
                         wordProgressBar.style.width = `${progress}%`;
@@ -324,4 +323,4 @@
     else { document.getElementById('loading-exam').innerHTML = '<h3 style="color:var(--error);">خطأ: رابط الاختبار غير مكتمل.</h3><p>يجب أن يحتوي الرابط على ID الاختبار للبدء.</p>'; }
   </script>
 </body>
-  </html>
+</html>
