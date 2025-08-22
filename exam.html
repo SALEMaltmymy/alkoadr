@@ -10,8 +10,9 @@
       --brand: #1e88e5; --brand-dark: #1565c0; --brand-light: #e3f2fd;
       --bg: #f4f7f9; --card-bg: #ffffff; --shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
       --ink: #0f172a; --muted: #6b7280; --border-color: #e5e7eb;
-      --error: #d32f2f; --success: #2e7d32;
+      --error: #d32f2f; --success: #22c55e;
     }
+    *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 0; }
     .container { width: min(650px, 92%); margin: auto; }
     .site-header { text-align: center; margin-bottom: 25px; }
@@ -25,13 +26,10 @@
     .step.active { display: block; animation: fade-slide-up 0.5s ease-out; }
     .progress-bar { background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 20px; height: 12px; }
     .progress { background: linear-gradient(135deg, var(--brand-dark), var(--brand)); height: 100%; width: 0%; transition: width 0.4s ease-in-out; }
-    input, textarea { width: 100%; padding: 14px; margin: 12px 0; border: 1.5px solid #ddd; border-radius: 14px; font-family: inherit; font-size: 16px; transition: all .3s; box-sizing: border-box; }
+    input, textarea { width: 100%; padding: 14px; margin: 12px 0; border: 1.5px solid #ddd; border-radius: 14px; font-family: inherit; font-size: 16px; transition: all .3s; }
     input:focus, textarea:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.15); }
-    textarea:disabled { background-color: #f0f0f0; cursor: not-allowed; }
-    .input-error { border-color: var(--error) !important; }
-    button { background: var(--brand); color: #fff; border: none; padding: 14px 30px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; margin: 15px auto 0; min-width: 140px; min-height: 50px; }
+    button { background: var(--brand); color: #fff; border: none; padding: 14px 30px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; min-width: 140px; min-height: 50px; }
     button:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(30, 136, 229, 0.3); }
-    button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
     .error { color: var(--error); font-size: 14px; margin-top: -8px; min-height: 20px; text-align: right; }
     .timer { font-size: 20px; font-weight: 700; color: var(--error); text-align: center; margin-bottom: 20px; background: #ffebee; padding: 10px; border-radius: 12px; }
     #total-timer-container { font-size: 20px; font-weight: 700; color: var(--error); text-align: center; margin-bottom: 20px; background: #ffebee; padding: 10px; border-radius: 12px; display: none; }
@@ -41,13 +39,21 @@
     #success-message { text-align: center; }
     #success-message .icon { font-size: 60px; color: var(--success); width: 90px; height: 90px; border-radius: 50%; background: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: icon-pop-in 0.5s ease-out; }
     @keyframes icon-pop-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    
-    /* ✅ تصميم عداد الكلمات المحسّن */
     .counter-wrapper { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 15px; }
     .counter-text { font-weight: bold; color: var(--brand-dark); white-space: nowrap; }
     .word-progress-bar { flex-grow: 1; height: 8px; background-color: #e0e0e0; border-radius: 4px; overflow: hidden; }
     .word-progress-bar-inner { height: 100%; width: 0%; background-color: var(--brand); border-radius: 4px; transition: width 0.3s ease, background-color 0.3s ease; }
     .word-progress-bar-inner.completed { background-color: var(--success); }
+    .step-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+    .btn-prev { background: var(--bg); color: var(--ink); border: 1px solid var(--border-color); }
+    .btn-prev:hover { background-color: #e2e8f0; box-shadow: none; transform: none; }
+    
+    @media (max-width: 600px) {
+        .card { padding: 20px; }
+        .site-header h1 { font-size: 1.8em; }
+        .site-header h2 { font-size: 1.1em; }
+        button { padding: 12px 20px; }
+    }
   </style>
 </head>
 <body>
@@ -65,13 +71,16 @@
       <div class="progress-bar" style="display: none;"><div class="progress" id="progress"></div></div>
       <form id="exam-form" style="display: none;">
         <div class="step" data-step="1">
-          <h3>الخطوة 1: الاسم</h3><input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية" required><div class="error" id="err1"></div><button type="button" data-next="2">التالي</button>
+          <h3>الخطوة 1: الاسم</h3><input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية" required><div class="error" id="err1"></div>
+          <div class="step-actions" style="justify-content: center;"><button type="button" data-next="2">التالي</button></div>
         </div>
         <div class="step" data-step="2">
-          <h3>الخطوة 2: رقم الهوية</h3><input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام" required maxlength="10"><div class="error" id="err2"></div><button type="button" data-next="3">التالي</button>
+          <h3>الخطوة 2: رقم الهوية</h3><input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام" required maxlength="10"><div class="error" id="err2"></div>
+          <div class="step-actions" style="justify-content: space-between;"><button type="button" class="btn-prev" data-prev="1">السابق</button><button type="button" data-next="3">التالي</button></div>
         </div>
         <div class="step" data-step="3">
-          <h3>الخطوة 3: بيانات التواصل</h3><input type="tel" id="phone" placeholder="رقم الجوال (05XXXXXXXX)" required><input type="email" id="email" placeholder="البريد الإلكتروني" required><div class="error" id="err3"></div><button type="button" data-next="4">بدء الاختبار</button>
+          <h3>الخطوة 3: بيانات التواصل</h3><input type="tel" id="phone" placeholder="رقم الجوال (05XXXXXXXX)" required><input type="email" id="email" placeholder="البريد الإلكتروني" required><div class="error" id="err3"></div>
+          <div class="step-actions" style="justify-content: space-between;"><button type="button" class="btn-prev" data-prev="2">السابق</button><button type="button" data-next="4">بدء الاختبار</button></div>
         </div>
       </form>
     </div>
@@ -87,15 +96,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
-      authDomain: "database-506.firebaseapp.com",
-      projectId: "database-506",
-      storageBucket: "database-506.firebasestorage.app",
-      messagingSenderId: "926446561022",
-      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -143,10 +144,10 @@
             const timerSpan = stepToShow.querySelector('.timer-span');
             const onTimeUp = () => {
                 stepToShow.querySelector('textarea').disabled = true;
-                stepToShow.querySelector('button').click();
+                stepToShow.querySelector('button[data-next], button[type="submit"]').click();
             };
             startTimer(question.duration * 60, timerSpan, onTimeUp);
-        } else if (examConfig.timerMode === 'total' && stepNumber === 4) {
+        } else if (examConfig.timerMode === 'total' && stepNumber === 4 && !timerInterval) {
             const totalTimerSpan = document.getElementById('total-timer-span');
             const onTimeUp = () => {
                 form.querySelectorAll('textarea').forEach(ta => ta.disabled = true);
@@ -213,10 +214,20 @@
                 examConfig.questions.forEach((q, i) => {
                     const stepNum = i + 4;
                     const isLast = (i === examConfig.questions.length - 1);
+                    const isFirstQuestion = (i === 0);
                     const stepDiv = document.createElement('div');
                     stepDiv.className = 'step';
                     stepDiv.dataset.step = stepNum;
                     const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
+                    
+                    const prevButtonHTML = !isFirstQuestion 
+                        ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>`
+                        : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`; // Special text for first question
+
+                    const nextButtonHTML = isLast 
+                        ? '<button type="submit">إرسال الإجابة النهائية</button>' 
+                        : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
+
                     stepDiv.innerHTML = `
                         <h3>السؤال ${i + 1} / ${examConfig.questions.length}</h3>
                         ${individualTimerHTML}
@@ -226,7 +237,10 @@
                             <div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div>
                             <div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div>
                         </div>
-                        ${isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`}`;
+                        <div class="step-actions">
+                            ${prevButtonHTML}
+                            ${nextButtonHTML}
+                        </div>`;
                     form.appendChild(stepDiv);
                     
                     const textarea = stepDiv.querySelector(`#answer-${i}`);
@@ -248,9 +262,19 @@
     }
 
     form.addEventListener('click', (e) => {
-      const target = e.target.closest('button[data-next]');
-      if (target) { if (validateStep(parseInt(target.closest('.step').dataset.step))) { showStep(parseInt(target.dataset.next)); } }
+        const nextBtn = e.target.closest('button[data-next]');
+        const prevBtn = e.target.closest('button[data-prev]');
+        if (nextBtn) { 
+            const currentStep = parseInt(nextBtn.closest('.step').dataset.step);
+            if (validateStep(currentStep)) {
+                showStep(parseInt(nextBtn.dataset.next));
+            }
+        }
+        if (prevBtn) {
+            showStep(parseInt(prevBtn.dataset.prev));
+        }
     });
+
     const urlParams = new URLSearchParams(window.location.search);
     const examId = urlParams.get('id');
     form.addEventListener('submit', (e) => { e.preventDefault(); submitExam(e.target.querySelector('button[type="submit"]'), examId); });
