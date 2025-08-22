@@ -27,7 +27,6 @@
       margin: auto;
       padding: 20px 0;
     }
-    /* --- شاشة تسجيل الدخول --- */
     #login-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(255, 255, 255, 0.7);
@@ -57,8 +56,6 @@
       font-size: 16px; font-weight: bold; width: 100%;
     }
     .login-box .error { color: #d32f2f; min-height: 20px; font-size: 14px; }
-
-    /* --- محتوى صفحة الأدمن --- */
     #admin-content { display: none; }
     .header {
       display: flex; justify-content: space-between; align-items: center;
@@ -67,12 +64,9 @@
     }
     .header img { height: 50px; }
     .header h1 { margin: 0; font-size: 24px; color: var(--brand-dark); }
-    
     #loading-indicator, #empty-state {
         text-align: center; font-size: 18px; color: var(--muted); padding: 50px;
     }
-
-    /* --- تصميم الشبكة المحسن --- */
     .submissions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -126,9 +120,7 @@
       transition: background-color 0.2s ease;
     }
     .view-btn:hover { background-color: var(--brand-dark); }
-
     .submission-card.is-hidden { display: none; }
-    
     .show-more-container { text-align: center; padding: 30px 0; }
     #show-more-btn {
         background-color: var(--brand-dark); color: white;
@@ -155,156 +147,158 @@
       <h1>إجابات الطلاب</h1>
       <img src="tbok.png" alt="شعار جامعة تبوك">
     </header>
-
     <div id="loading-indicator"><p>جاري تحميل البيانات...</p></div>
     <div id="empty-state" style="display: none;"><p>لا توجد إجابات مقدمة حتى الآن.</p></div>
-    
     <div class="submissions-grid" id="submissions-grid"></div>
-    
     <div class="show-more-container" id="show-more-container" style="display: none;">
       <button id="show-more-btn">عرض المزيد</button>
     </div>
   </div>
 
-  <script type="module">
-    // --- الجزء الخاص بتسجيل الدخول المؤقت ---
-    const loginOverlay = document.getElementById('login-overlay');
-    const adminContent = document.getElementById('admin-content');
-    const passwordInput = document.getElementById('password-input');
-    const loginBtn = document.getElementById('login-btn');
-    const errorMessage = document.getElementById('error-message');
-    const correctPassword = "KHLEDADMIN";
-    const sessionTimeout = 15 * 60 * 1000; // 15 دقيقة
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-    function handleLogin() {
-      if (passwordInput.value === correctPassword) {
-        localStorage.setItem('loginTimestamp', Date.now());
-        checkLoginSession();
-      } else {
-        errorMessage.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
-      }
-    }
-    function checkLoginSession() {
-      const loginTimestamp = localStorage.getItem('loginTimestamp');
-      if (loginTimestamp && (Date.now() - loginTimestamp < sessionTimeout)) {
-        loginOverlay.style.display = 'none';
-        adminContent.style.display = 'block';
-        if (document.getElementById('submissions-grid').childElementCount === 0) {
-          fetchSubmissions();
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- الجزء الخاص بتسجيل الدخول المؤقت ---
+      const loginOverlay = document.getElementById('login-overlay');
+      const adminContent = document.getElementById('admin-content');
+      const passwordInput = document.getElementById('password-input');
+      const loginBtn = document.getElementById('login-btn');
+      const errorMessage = document.getElementById('error-message');
+      const correctPassword = "KHLEDADMIN";
+      const sessionTimeout = 15 * 60 * 1000; // 15 دقيقة
+
+      function handleLogin() {
+        if (passwordInput.value === correctPassword) {
+          localStorage.setItem('loginTimestamp', Date.now());
+          checkLoginSession();
+        } else {
+          errorMessage.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
         }
-      } else {
-        loginOverlay.style.display = 'flex';
-        adminContent.style.display = 'none';
-        localStorage.removeItem('loginTimestamp');
       }
-    }
-    loginBtn.addEventListener('click', handleLogin);
-    passwordInput.addEventListener('keypress', (event) => {
+
+      function checkLoginSession() {
+        const loginTimestamp = localStorage.getItem('loginTimestamp');
+        if (loginTimestamp && (Date.now() - loginTimestamp < sessionTimeout)) {
+          loginOverlay.style.display = 'none';
+          adminContent.style.display = 'block';
+          fetchSubmissions(); 
+        } else {
+          loginOverlay.style.display = 'flex';
+          adminContent.style.display = 'none';
+          localStorage.removeItem('loginTimestamp');
+        }
+      }
+
+      loginBtn.addEventListener('click', handleLogin);
+      passwordInput.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') handleLogin();
-    });
+      });
 
-    // --- الجزء الخاص بـ Firebase وجلب البيانات ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      // --- الجزء الخاص بـ Firebase وجلب البيانات ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
+        authDomain: "database-506.firebaseapp.com",
+        projectId: "database-506",
+        storageBucket: "database-506.firebasestorage.app",
+        messagingSenderId: "926446561022",
+        appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af",
+        measurementId: "G-F63G3YFTYY"
+      };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU",
-      authDomain: "database-506.firebaseapp.com",
-      projectId: "database-506",
-      storageBucket: "database-506.firebasestorage.app",
-      messagingSenderId: "926446561022",
-      appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af"
-    };
+      // تهيئة التطبيق وقاعدة البيانات
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    /**
-     * Helper function to format Firestore Timestamp to a readable string.
-     * @param {object} timestamp - The Firestore Timestamp object.
-     * @returns {string} - Formatted date string or an empty string.
-     */
-    function formatTimestamp(timestamp) {
+      function formatTimestamp(timestamp) {
         if (!timestamp || typeof timestamp.toDate !== 'function') {
-            return 'تاريخ غير متوفر';
+          return 'تاريخ غير متوفر';
         }
         return timestamp.toDate().toLocaleString('ar-SA', {
-            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
-    }
+      }
 
-    async function fetchSubmissions() {
-      const grid = document.getElementById('submissions-grid');
-      const loadingIndicator = document.getElementById('loading-indicator');
-      const emptyState = document.getElementById('empty-state');
-      const showMoreContainer = document.getElementById('show-more-container');
+      async function fetchSubmissions() {
+        const grid = document.getElementById('submissions-grid');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const emptyState = document.getElementById('empty-state');
+        const showMoreContainer = document.getElementById('show-more-container');
         
-      try {
-        // ✅ FIX: Changed orderBy field from "timestamp" to "submissionTime"
-        const q = query(collection(db, "exams"), orderBy("submissionTime", "desc"));
-        const querySnapshot = await getDocs(q);
+        grid.innerHTML = '';
+        loadingIndicator.style.display = 'block';
+        emptyState.style.display = 'none';
+        showMoreContainer.style.display = 'none';
+        
+        try {
+          const querySnapshot = await db.collection("exams")
+                                         .orderBy("submissionTime", "desc")
+                                         .get();
 
-        loadingIndicator.style.display = 'none';
+          loadingIndicator.style.display = 'none';
 
-        if (querySnapshot.empty) {
+          if (querySnapshot.empty) {
             emptyState.style.display = 'block';
             return;
-        }
-
-        let cardCount = 0;
-        const visibleLimit = 12;
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const card = document.createElement('div');
-          card.className = 'submission-card';
-          
-          if (cardCount >= visibleLimit) {
-              card.classList.add('is-hidden');
           }
-          card.style.animationDelay = `${(cardCount % visibleLimit) * 0.05}s`;
-          
-          // ✨ IMPROVEMENT: Dynamic avatar from name and new card structure
-          const name = data.name || 'غير معروف';
-          const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.charAt(0))}&background=random&color=fff&size=60&font-size=0.5`;
 
-          card.innerHTML = `
-            <div class="card-content">
+          let cardCount = 0;
+          const visibleLimit = 12;
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.className = 'submission-card';
+            
+            if (cardCount >= visibleLimit) {
+              card.classList.add('is-hidden');
+            }
+            card.style.animationDelay = `${(cardCount % visibleLimit) * 0.05}s`;
+            
+            const name = data.name || 'غير معروف';
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.charAt(0))}&background=random&color=fff&size=60&font-size=0.5`;
+
+            card.innerHTML = `
+              <div class="card-content">
                 <img src="${avatarUrl}" alt="صورة الطالب" class="user-avatar">
                 <div class="user-info">
                   <h3>${name}</h3>
                   <p>رقم الهوية: ${data.idNumber || 'غير متوفر'}</p>
                 </div>
-            </div>
-            <div class="card-footer">
+              </div>
+              <div class="card-footer">
                 <span class="submission-date">${formatTimestamp(data.submissionTime)}</span>
                 <a href="Exhibition.html?id=${doc.id}" class="view-btn">عرض التفاصيل</a>
-            </div>
-          `;
-          grid.appendChild(card);
-          cardCount++;
-        });
-        
-        if (querySnapshot.size > visibleLimit) {
+              </div>
+            `;
+            grid.appendChild(card);
+            cardCount++;
+          });
+          
+          if (querySnapshot.size > visibleLimit) {
             showMoreContainer.style.display = 'block';
-        }
+          }
 
-      } catch (error) {
-        loadingIndicator.innerHTML = '<p style="color: red;">حدث خطأ أثناء جلب البيانات. تأكد من اتصالك بالإنترنت وقواعد الأمان في Firebase.</p>';
-        console.error("Error fetching documents: ", error);
+        } catch (error) {
+          loadingIndicator.innerHTML = '<p style="color: red;">حدث خطأ أثناء جلب البيانات. تأكد من اتصالك بالإنترنت وقواعد الأمان في Firebase.</p>';
+          console.error("Error fetching documents: ", error);
+        }
       }
-    }
-    
-    // "Show More" button functionality remains the same
-    const showMoreBtn = document.getElementById('show-more-btn');
-    showMoreBtn.addEventListener('click', () => {
+      
+      const showMoreBtn = document.getElementById('show-more-btn');
+      showMoreBtn.addEventListener('click', () => {
         document.querySelectorAll('.submission-card.is-hidden').forEach(card => {
-            card.classList.remove('is-hidden');
+          card.classList.remove('is-hidden');
         });
         showMoreBtn.parentElement.style.display = 'none';
+      });
+      
+      // بدء تشغيل الكود عند تحميل الصفحة
+      checkLoginSession();
     });
-    
-    checkLoginSession();
   </script>
 
 </body>
