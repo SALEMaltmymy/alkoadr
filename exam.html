@@ -7,162 +7,39 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand: #1e88e5;
-      --brand-dark: #1565c0;
-      --brand-light: #e3f2fd;
-      --bg: #f4f7f9;
-      --card-bg: #ffffff;
-      --shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
-      --ink: #0f172a;
-      --muted: #6b7280;
-      --border-color: #e5e7eb;
-      --error: #d32f2f;
-      --success: #2e7d32;
+      --brand: #1e88e5; --brand-dark: #1565c0; --brand-light: #e3f2fd;
+      --bg: #f4f7f9; --card-bg: #ffffff; --shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+      --ink: #0f172a; --muted: #6b7280; --border-color: #e5e7eb;
+      --error: #d32f2f; --success: #2e7d32;
     }
-    body {
-      margin: 0;
-      font-family: "Tajawal", sans-serif;
-      background-color: var(--bg);
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px 0;
-    }
-    .container {
-      width: min(650px, 92%);
-      margin: auto;
-    }
-    .site-header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    .site-header .logo {
-      max-width: 90px;
-      height: auto;
-      margin-bottom: 15px;
-    }
-    .site-header h1 {
-      font-weight: 800;
-      color: var(--brand-dark);
-      margin: 0 0 5px 0;
-      font-size: 2em;
-    }
-    .site-header h2 {
-      font-weight: 700;
-      color: var(--ink);
-      margin: 0;
-      font-size: 1.2em;
-    }
-    .supervisor {
-      text-align: center;
-      margin: -5px 0 25px;
-      color: var(--muted);
-    }
-    .card {
-      background: var(--card-bg);
-      border-radius: 22px;
-      padding: 30px 40px;
-      box-shadow: var(--shadow);
-      margin-top: 20px;
-      transition: all .4s ease;
-      animation: fade-slide-up .6s ease-out;
-    }
-    @keyframes fade-slide-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 0; }
+    .container { width: min(650px, 92%); margin: auto; }
+    .site-header { text-align: center; margin-bottom: 25px; }
+    .site-header .logo { max-width: 90px; height: auto; margin-bottom: 15px; }
+    .site-header h1 { font-weight: 800; color: var(--brand-dark); margin: 0 0 5px 0; font-size: 2em; }
+    .site-header h2 { font-weight: 700; color: var(--ink); margin: 0; font-size: 1.2em; }
+    .supervisor { text-align: center; margin: -5px 0 25px; color: var(--muted); }
+    .card { background: var(--card-bg); border-radius: 22px; padding: 30px 40px; box-shadow: var(--shadow); margin-top: 20px; transition: all .4s ease; animation: fade-slide-up .6s ease-out; }
+    @keyframes fade-slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .step { display: none; }
     .step.active { display: block; animation: fade-slide-up 0.5s ease-out; }
-    .progress-bar {
-      background: #e0e0e0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 30px;
-      height: 12px;
-    }
-    .progress {
-      background: linear-gradient(135deg, var(--brand-dark), var(--brand));
-      height: 100%;
-      width: 0%;
-      transition: width 0.4s ease-in-out;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 14px;
-      margin: 12px 0;
-      border: 1.5px solid #ddd;
-      border-radius: 14px;
-      font-family: inherit;
-      font-size: 16px;
-      transition: all .3s;
-      box-sizing: border-box;
-    }
-    input:focus, textarea:focus {
-      border-color: var(--brand);
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.15);
-    }
-    textarea:disabled {
-      background-color: #f0f0f0;
-      cursor: not-allowed;
-    }
+    .progress-bar { background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 30px; height: 12px; }
+    .progress { background: linear-gradient(135deg, var(--brand-dark), var(--brand)); height: 100%; width: 0%; transition: width 0.4s ease-in-out; }
+    input, textarea { width: 100%; padding: 14px; margin: 12px 0; border: 1.5px solid #ddd; border-radius: 14px; font-family: inherit; font-size: 16px; transition: all .3s; box-sizing: border-box; }
+    input:focus, textarea:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.15); }
+    textarea:disabled { background-color: #f0f0f0; cursor: not-allowed; }
     .input-error { border-color: var(--error) !important; }
-    button {
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      padding: 14px 30px;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 15px auto 0;
-      min-width: 140px;
-      min-height: 50px;
-    }
-    button:hover {
-      background: var(--brand-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(30, 136, 229, 0.3);
-    }
+    button { background: var(--brand); color: #fff; border: none; padding: 14px 30px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; margin: 15px auto 0; min-width: 140px; min-height: 50px; }
+    button:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(30, 136, 229, 0.3); }
     button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
     .counter { color: var(--brand-dark); font-weight: bold; margin-top: 8px; text-align: right; }
     .error { color: var(--error); font-size: 14px; margin-top: -8px; min-height: 20px; text-align: right; }
-    .timer {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--error);
-      text-align: center;
-      margin-bottom: 20px;
-      background: #ffebee;
-      padding: 10px;
-      border-radius: 12px;
-    }
+    .timer { font-size: 20px; font-weight: 700; color: var(--error); text-align: center; margin-bottom: 20px; background: #ffebee; padding: 10px; border-radius: 12px; }
     .credit { text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px; }
     .loader { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.5); border-top-color: #FFF; border-radius: 50%; display: inline-block; animation: rotation 0.8s linear infinite; }
     @keyframes rotation { to { transform: rotate(360deg); } }
-    #success-message {
-      text-align: center;
-    }
-    #success-message .icon {
-      font-size: 60px;
-      color: var(--success);
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: #e8f5e9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      animation: icon-pop-in 0.5s ease-out;
-    }
+    #success-message { text-align: center; }
+    #success-message .icon { font-size: 60px; color: var(--success); width: 90px; height: 90px; border-radius: 50%; background: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: icon-pop-in 0.5s ease-out; }
     @keyframes icon-pop-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
@@ -179,34 +56,24 @@
       <div id="loading-exam" style="text-align: center; padding: 40px 0;">
           <p>جاري تحميل الاختبار، يرجى الانتظار...</p>
       </div>
-      
-      <div class="progress-bar" style="display: none;">
-        <div class="progress" id="progress"></div>
-      </div>
-
+      <div class="progress-bar" style="display: none;"><div class="progress" id="progress"></div></div>
       <form id="exam-form" style="display: none;">
         <div class="step" data-step="1">
           <h3>الخطوة 1: الاسم</h3>
-          <input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية" required>
-          <div class="error" id="err1"></div>
+          <input type="text" id="name" placeholder="اكتب اسمك الكامل باللغة العربية" required><div class="error" id="err1"></div>
           <button type="button" data-next="2">التالي</button>
         </div>
-
         <div class="step" data-step="2">
           <h3>الخطوة 2: رقم الهوية</h3>
-          <input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام" required maxlength="10">
-          <div class="error" id="err2"></div>
+          <input type="text" id="idNumber" placeholder="أدخل رقم الهوية المكون من 10 أرقام" required maxlength="10"><div class="error" id="err2"></div>
           <button type="button" data-next="3">التالي</button>
         </div>
-
         <div class="step" data-step="3">
           <h3>الخطوة 3: بيانات التواصل</h3>
           <input type="tel" id="phone" placeholder="رقم الجوال (05XXXXXXXX)" required>
-          <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-          <div class="error" id="err3"></div>
+          <input type="email" id="email" placeholder="البريد الإلكتروني" required><div class="error" id="err3"></div>
           <button type="button" data-next="4">بدء الاختبار</button>
         </div>
-        
         </form>
     </div>
 
@@ -216,13 +83,10 @@
         <p>شكرًا لك على إتمام الاختبار. سيتم مراجعة إجابتك والتواصل معك قريبًا.</p>
     </div>
     
-    <footer class="credit">
-        <p>اعداد/المهندس خالد الغامدي</p>
-    </footer>
+    <footer class="credit"><p>اعداد/المهندس خالد الغامدي</p></footer>
   </div>
 
   <script type="module">
-    // --- Firebase & Global Config ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -238,7 +102,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- DOM Element Caching & State ---
     const form = document.getElementById('exam-form');
     const examCard = document.getElementById('exam-card');
     const successMessage = document.getElementById('success-message');
@@ -249,14 +112,12 @@
     const emailInput = document.getElementById('email');
     
     let timerInterval = null;
-    let TOTAL_STEPS = 3; // 3 steps for personal data
+    let TOTAL_STEPS = 3;
     let examQuestions = [];
 
-    // --- Core UI Functions ---
     const updateProgress = (step) => {
       progressBar.parentElement.style.display = 'block';
-      const progressPercentage = ((step - 1) / TOTAL_STEPS) * 100;
-      progressBar.style.width = `${progressPercentage}%`;
+      progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`;
     };
 
     const startTimer = (durationInSeconds, display) => {
@@ -281,7 +142,6 @@
       if (stepToShow) {
         stepToShow.classList.add("active");
         updateProgress(stepNumber);
-        
         if (stepNumber > 3) {
             const questionIndex = stepNumber - 4;
             const question = examQuestions[questionIndex];
@@ -291,60 +151,41 @@
       }
     };
     
-    // --- Validation ---
-    const showError = (step, message) => { 
-        const errEl = document.getElementById(`err${step}`);
-        if(errEl) errEl.textContent = message;
-    };
-    const clearError = (step) => { 
-        const errEl = document.getElementById(`err${step}`);
-        if(errEl) errEl.textContent = '';
-    };
-    const validateStep = (currentStep) => {
-      clearError(currentStep);
+    const showError = (step, msg) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = msg; };
+    const clearError = (step) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = ''; };
+    const validateStep = (step) => {
+      clearError(step);
       let valid = true;
-      if (currentStep === 1) {
-        const arabicRegex = /^[\u0600-\u06FF\s]+$/;
-        if (!arabicRegex.test(nameInput.value.trim())) { showError(1, "الرجاء إدخال الاسم باللغة العربية فقط"); valid = false; }
-      } else if (currentStep === 2) {
-        if (!/^\d{10}$/.test(idInput.value.trim())) { showError(2, "يجب أن يتكون رقم الهوية من 10 أرقام"); valid = false; }
-      } else if (currentStep === 3) {
-        if (!/^05\d{8}$/.test(phoneInput.value.trim())) { showError(3, "صيغة رقم الجوال غير صحيحة (مثال: 0512345678)"); valid = false; }
+      if (step === 1) { if (!/^[\u0600-\u06FF\s]+$/.test(nameInput.value.trim())) { showError(1, "الاسم مطلوب باللغة العربية"); valid = false; } }
+      else if (step === 2) { if (!/^\d{10}$/.test(idInput.value.trim())) { showError(2, "رقم الهوية يجب أن يتكون من 10 أرقام"); valid = false; } }
+      else if (step === 3) {
+        if (!/^05\d{8}$/.test(phoneInput.value.trim())) { showError(3, "صيغة الجوال غير صحيحة (e.g., 0512345678)"); valid = false; }
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) { showError(3, "صيغة البريد الإلكتروني غير صحيحة"); valid = false; }
       }
       return valid;
     };
     
-    // --- Data Handling ---
     const submitExam = async (submitButton, examId) => {
         clearInterval(timerInterval);
         submitButton.disabled = true;
         submitButton.innerHTML = '<span class="loader"></span> جاري الإرسال...';
-
-        const answers = examQuestions.map((q, index) => {
-            const textarea = document.getElementById(`answer-${index}`);
+        const answers = examQuestions.map((q, i) => {
+            const textarea = document.getElementById(`answer-${i}`);
             const answerText = textarea ? textarea.value.trim() : "";
             const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length;
             return { question: q.text, answer: answerText, wordCount: wordCount };
         });
-
         const formData = {
-            name: nameInput.value.trim(),
-            idNumber: idInput.value.trim(),
-            phone: phoneInput.value.trim(),
-            email: emailInput.value.trim(),
-            examId: examId,
-            answers: answers,
-            submissionTime: serverTimestamp()
+            name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(),
+            email: emailInput.value.trim(), examId: examId, answers: answers, submissionTime: serverTimestamp()
         };
-
         try {
             await addDoc(collection(db, "Submissions"), formData);
             examCard.style.display = 'none';
             successMessage.style.display = 'block';
         } catch (e) {
             console.error("Error adding document: ", e);
-            alert("❌ حدث خطأ أثناء الإرسال. الرجاء التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.");
+            alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.");
             submitButton.disabled = false;
             submitButton.textContent = "إرسال الإجابة النهائية";
         }
@@ -355,39 +196,67 @@
         try {
             const docRef = doc(db, "Exams", examId);
             const docSnap = await getDoc(docRef);
-
             if (docSnap.exists()) {
                 const examData = docSnap.data();
+                if (!examData.isActive) {
+                    loadingDiv.innerHTML = '<h3 style="color:var(--error);">هذا الاختبار غير متاح حاليًا.</h3><p>يرجى مراجعة المشرف على الاختبار.</p>';
+                    return;
+                }
                 examQuestions = examData.questions;
                 TOTAL_STEPS += examQuestions.length;
                 document.getElementById('exam-title-display').textContent = examData.title;
-
-                examQuestions.forEach((q, index) => {
-                    const stepNumber = index + 4;
-                    const isLastQuestion = (index === examQuestions.length - 1);
+                examQuestions.forEach((q, i) => {
+                    const stepNum = i + 4;
+                    const isLast = (i === examQuestions.length - 1);
                     const stepDiv = document.createElement('div');
                     stepDiv.className = 'step';
-                    stepDiv.dataset.step = stepNumber;
+                    stepDiv.dataset.step = stepNum;
                     stepDiv.innerHTML = `
-                        <h3>السؤال ${index + 1} من ${examQuestions.length}</h3>
+                        <h3>السؤال ${i + 1} / ${examQuestions.length}</h3>
                         <div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>
                         <p style="font-size: 1.1em; line-height: 1.7;">${q.text}</p>
-                        <textarea id="answer-${index}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea>
-                        <div class="counter">عدد الكلمات: <span id="wordCount-${index}">0</span> / ${q.wordCount}</div>
-                        ${isLastQuestion 
-                            ? '<button type="submit">إرسال الإجابة النهائية</button>' 
-                            : `<button type="button" data-next="${stepNumber + 1}">السؤال التالي</button>`
-                        }`;
+                        <textarea id="answer-${i}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea>
+                        <div class="error" id="rate-limit-warning-${i}"></div>
+                        <div class="counter">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div>
+                        ${isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`}`;
                     form.appendChild(stepDiv);
+                    
+                    // ✅ ربط كل مربع نص بميزة منع الكتابة السريعة
+                    const textarea = stepDiv.querySelector(`#answer-${i}`);
+                    const wordCountSpan = stepDiv.querySelector(`#wordCount-${i}`);
+                    const rateLimitWarning = stepDiv.querySelector(`#rate-limit-warning-${i}`);
+                    
+                    let lastValidAnswer = textarea.value;
+                    let lastInputTime = Date.now();
+                    let charCountThisSecond = 0;
+                    const RATE_LIMIT = 20; // 20 حرفًا في الثانية كحد أقصى
 
-                    const textarea = stepDiv.querySelector(`#answer-${index}`);
-                    const wordCountSpan = stepDiv.querySelector(`#wordCount-${index}`);
                     textarea.addEventListener('input', () => {
-                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
-                        wordCountSpan.textContent = words.length;
+                        const currentTime = Date.now();
+                        const timeDiff = currentTime - lastInputTime;
+                        const currentValue = textarea.value;
+                        const charsAdded = currentValue.length - lastValidAnswer.length;
+
+                        if (charsAdded > 0) {
+                            if (timeDiff > 1000) {
+                                charCountThisSecond = 0;
+                                lastInputTime = currentTime;
+                            }
+                            charCountThisSecond += charsAdded;
+                            if (charCountThisSecond > RATE_LIMIT) {
+                                textarea.value = lastValidAnswer;
+                                rateLimitWarning.textContent = 'تم تجاوز حد السرعة في الكتابة!';
+                                setTimeout(() => { rateLimitWarning.textContent = ''; }, 2000);
+                            } else {
+                                lastValidAnswer = currentValue;
+                            }
+                        } else {
+                            lastValidAnswer = currentValue;
+                        }
+                        
+                        wordCountSpan.textContent = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
                     });
                 });
-
                 loadingDiv.style.display = 'none';
                 form.style.display = 'block';
                 showStep(1);
@@ -396,16 +265,14 @@
             }
         } catch (error) {
             console.error("Error fetching exam:", error);
-            loadingDiv.innerHTML = '<h3 style="color:var(--error);">حدث خطأ أثناء تحميل الاختبار.</h3><p>يرجى التحقق من اتصالك بالإنترنت وتحديث الصفحة.</p>';
+            loadingDiv.innerHTML = '<h3 style="color:var(--error);">حدث خطأ أثناء تحميل الاختبار.</h3><p>يرجى تحديث الصفحة.</p>';
         }
     }
 
-    // --- Event Listeners & Initialization ---
     form.addEventListener('click', (e) => {
       const target = e.target.closest('button[data-next]');
       if (target) {
-        const currentStep = parseInt(target.closest('.step').dataset.step);
-        if (validateStep(currentStep)) {
+        if (validateStep(parseInt(target.closest('.step').dataset.step))) {
           showStep(parseInt(target.dataset.next));
         }
       }
@@ -413,7 +280,6 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const examId = urlParams.get('id');
-
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       submitExam(e.target.querySelector('button[type="submit"]'), examId);
@@ -422,7 +288,7 @@
     if (examId) {
         loadExam(examId);
     } else {
-        document.getElementById('loading-exam').innerHTML = '<h3 style="color:var(--error);">خطأ: رابط الاختبار غير مكتمل.</h3><p>يجب أن يحتوي الرابط على ID الاختبار.</p>';
+        document.getElementById('loading-exam').innerHTML = '<h3 style="color:var(--error);">خطأ: رابط الاختبار غير مكتمل.</h3><p>يجب أن يحتوي الرابط على ID الاختبار للبدء.</p>';
     }
   </script>
 </body>
