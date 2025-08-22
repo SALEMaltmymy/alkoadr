@@ -267,7 +267,7 @@
                     let lastValidAnswer = textarea.value;
                     let lastInputTime = Date.now();
                     let charCountThisInterval = 0;
-                    const RATE_LIMIT_CHARS = 10; // ✅ تم التغيير إلى 10
+                    const RATE_LIMIT_CHARS = 6; // ✅ تم التغيير إلى 10
                     
                     textarea.addEventListener('input', () => {
                         const currentTime = Date.now();
@@ -280,7 +280,7 @@
                             charCountThisInterval += charsAdded;
                             if (charCountThisInterval > RATE_LIMIT_CHARS) {
                                 textarea.value = lastValidAnswer;
-                                showToast('رصد محاولة غش: سرعة الكتابة عالية جدًا');
+                                showToast('رصد محاولة غش:');
                             } else { lastValidAnswer = currentValue; }
                         } else { lastValidAnswer = currentValue; }
                         
