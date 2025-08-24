@@ -39,7 +39,6 @@
     .progress-bar { background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 20px; height: 12px; }
     .progress { background: linear-gradient(135deg, var(--brand-dark), var(--brand)); height: 100%; width: 0%; transition: width 0.4s ease-in-out; }
     input, textarea { width: 100%; padding: 14px; margin: 12px 0; border: 1.5px solid #ddd; border-radius: 14px; font-family: inherit; font-size: 16px; transition: all .3s; }
-    input:focus, textarea:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.15); }
     button { background: var(--brand); color: #fff; border: none; padding: 14px 30px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; min-width: 140px; min-height: 50px; }
     button:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(30, 136, 229, 0.3); }
     .error { color: var(--error); font-size: 14px; margin-top: -8px; min-height: 20px; text-align: right; }
@@ -117,8 +116,12 @@
     import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     function isMobileDevice() {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase()) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        // ✅ الكود الجديد والأكثر دقة: يركز على الكلمات الدالة على الجوالات والأجهزة اللوحية
+        const userAgent = navigator.userAgent;
+        // iPad Pro user agent might not contain "Mobi", so we check for touch capability as a secondary measure for tablets.
+        const isTablet = /iPad|Android(?!.*Mobi)/i.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isMobile = /Mobi|Android|iPhone/i.test(userAgent);
+        return isMobile || isTablet;
     }
 
     if (isMobileDevice()) {
@@ -157,7 +160,7 @@
                 toast.addEventListener('transitionend', () => toast.remove());
             }, 4000);
         }
-
+        
         const updateProgress = (step) => { progressBar.parentElement.style.display = 'block'; progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`; };
         const startTimer = (durationInSeconds, display, onTimeUp) => { clearInterval(timerInterval); let timer = durationInSeconds; timerInterval = setInterval(() => { let minutes = Math.floor(timer / 60).toString().padStart(2, '0'); let seconds = (timer % 60).toString().padStart(2, '0'); display.textContent = `${minutes}:${seconds}`; if (--timer < 0) { clearInterval(timerInterval); onTimeUp(); } }, 1000); };
         const showStep = (stepNumber) => {
@@ -216,7 +219,6 @@
                         const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
                         const prevButtonHTML = !isFirstQuestion ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>` : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
                         const nextButtonHTML = isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
-
                         stepDiv.innerHTML = `<h3>السؤال ${i + 1} / ${examConfig.questions.length}</h3>${individualTimerHTML}<p style="font-size: 1.1em; line-height: 1.7;">${q.text}</p><textarea id="answer-${i}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea><div class="counter-wrapper"><div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div><div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div></div><div class="step-actions">${prevButtonHTML}${nextButtonHTML}</div>`;
                         form.appendChild(stepDiv);
                         
@@ -224,29 +226,22 @@
                         const wordCountSpan = stepDiv.querySelector(`#wordCount-${i}`);
                         const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
                         const targetWordCount = q.wordCount;
-                        
                         textarea.lastValue = '';
-                        
                         textarea.addEventListener('input', () => {
                             const currentValue = textarea.value;
                             const charsAdded = currentValue.length - textarea.lastValue.length;
-
                             if (charsAdded > 3) {
                                 textarea.value = textarea.lastValue;
                                 showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
                                 return;
                             }
-                            
                             textarea.lastValue = currentValue;
-
                             const words = currentValue.trim().split(/\s+/).filter(w => w.length > 0);
                             const currentWordCount = words.length;
-
                             if (currentWordCount >= targetWordCount && !wordLimitToastShown[i]) {
                                 showToast('لقد وصلت إلى العدد المطلوب من الكلمات', 'success');
                                 wordLimitToastShown[i] = true;
                             }
-                            
                             wordCountSpan.textContent = currentWordCount;
                             const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
                             wordProgressBar.style.width = `${progress}%`;
