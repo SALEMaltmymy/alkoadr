@@ -66,7 +66,7 @@
   </style>
 </head>
 <body>
-  <div id="device-restriction-overlay">
+  <div id="device-restriction-overlay" style="display: none;">
     <div class="restriction-box">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -115,170 +115,156 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    function isMobileDevice() {
-        // ✅ الكود الجديد والأكثر دقة: يركز على الكلمات الدالة على الجوالات والأجهزة اللوحية
-        const userAgent = navigator.userAgent;
-        // iPad Pro user agent might not contain "Mobi", so we check for touch capability as a secondary measure for tablets.
-        const isTablet = /iPad|Android(?!.*Mobi)/i.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isMobile = /Mobi|Android|iPhone/i.test(userAgent);
-        return isMobile || isTablet;
+    // ✅ تم إزالة الجزء المسؤول عن فحص نوع الجهاز
+
+    const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.getElementById('exam-form');
+    const examCard = document.getElementById('exam-card');
+    const successMessage = document.getElementById('success-message');
+    const progressBar = document.getElementById('progress');
+    const nameInput = document.getElementById('name');
+    const idInput = document.getElementById('idNumber');
+    const phoneInput = document.getElementById('phone');
+    const emailInput = document.getElementById('email');
+    
+    let timerInterval = null;
+    let TOTAL_STEPS = 3;
+    let examConfig = {};
+    let wordLimitToastShown = {};
+
+    function showToast(message, type = 'error') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 4000);
     }
-
-    if (isMobileDevice()) {
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.container').style.display = 'none';
-            document.getElementById('device-restriction-overlay').style.display = 'flex';
-        });
-    } else {
-        const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        const form = document.getElementById('exam-form');
-        const examCard = document.getElementById('exam-card');
-        const successMessage = document.getElementById('success-message');
-        const progressBar = document.getElementById('progress');
-        const nameInput = document.getElementById('name');
-        const idInput = document.getElementById('idNumber');
-        const phoneInput = document.getElementById('phone');
-        const emailInput = document.getElementById('email');
-        
-        let timerInterval = null;
-        let TOTAL_STEPS = 3;
-        let examConfig = {};
-        let wordLimitToastShown = {};
-
-        function showToast(message, type = 'error') {
-            const toastContainer = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 4000);
+    
+    const updateProgress = (step) => { progressBar.parentElement.style.display = 'block'; progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`; };
+    const startTimer = (durationInSeconds, display, onTimeUp) => { clearInterval(timerInterval); let timer = durationInSeconds; timerInterval = setInterval(() => { let minutes = Math.floor(timer / 60).toString().padStart(2, '0'); let seconds = (timer % 60).toString().padStart(2, '0'); display.textContent = `${minutes}:${seconds}`; if (--timer < 0) { clearInterval(timerInterval); onTimeUp(); } }, 1000); };
+    const showStep = (stepNumber) => {
+      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+      const stepToShow = document.querySelector(`.step[data-step="${stepNumber}"]`);
+      if (stepToShow) {
+        stepToShow.classList.add("active");
+        updateProgress(stepNumber);
+        if (examConfig.timerMode === 'individual' && stepNumber > 3) {
+            const questionIndex = stepNumber - 4; const question = examConfig.questions[questionIndex];
+            const timerSpan = stepToShow.querySelector('.timer-span');
+            const onTimeUp = () => { stepToShow.querySelector('textarea').disabled = true; stepToShow.querySelector('button[data-next], button[type="submit"]').click(); };
+            startTimer(question.duration * 60, timerSpan, onTimeUp);
+        } else if (examConfig.timerMode === 'total' && stepNumber === 4 && !timerInterval) {
+            const totalTimerSpan = document.getElementById('total-timer-span');
+            const onTimeUp = () => { form.querySelectorAll('textarea').forEach(ta => ta.disabled = true); submitExam(form.querySelector('button[type="submit"]'), examConfig.id); };
+            startTimer(examConfig.totalDuration * 60, totalTimerSpan, onTimeUp);
         }
-        
-        const updateProgress = (step) => { progressBar.parentElement.style.display = 'block'; progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`; };
-        const startTimer = (durationInSeconds, display, onTimeUp) => { clearInterval(timerInterval); let timer = durationInSeconds; timerInterval = setInterval(() => { let minutes = Math.floor(timer / 60).toString().padStart(2, '0'); let seconds = (timer % 60).toString().padStart(2, '0'); display.textContent = `${minutes}:${seconds}`; if (--timer < 0) { clearInterval(timerInterval); onTimeUp(); } }, 1000); };
-        const showStep = (stepNumber) => {
-          document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
-          const stepToShow = document.querySelector(`.step[data-step="${stepNumber}"]`);
-          if (stepToShow) {
-            stepToShow.classList.add("active");
-            updateProgress(stepNumber);
-            if (examConfig.timerMode === 'individual' && stepNumber > 3) {
-                const questionIndex = stepNumber - 4; const question = examConfig.questions[questionIndex];
-                const timerSpan = stepToShow.querySelector('.timer-span');
-                const onTimeUp = () => { stepToShow.querySelector('textarea').disabled = true; stepToShow.querySelector('button[data-next], button[type="submit"]').click(); };
-                startTimer(question.duration * 60, timerSpan, onTimeUp);
-            } else if (examConfig.timerMode === 'total' && stepNumber === 4 && !timerInterval) {
-                const totalTimerSpan = document.getElementById('total-timer-span');
-                const onTimeUp = () => { form.querySelectorAll('textarea').forEach(ta => ta.disabled = true); submitExam(form.querySelector('button[type="submit"]'), examConfig.id); };
-                startTimer(examConfig.totalDuration * 60, totalTimerSpan, onTimeUp);
-            }
-          }
-        };
-        const showError = (step, msg) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = msg; };
-        const clearError = (step) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = ''; };
-        const validateStep = (step) => {
-          clearError(step); let valid = true;
-          if (step === 1) { if (!/^[\u0600-\u06FF\s]+$/.test(nameInput.value.trim())) { showError(1, "الاسم مطلوب باللغة العربية"); valid = false; } }
-          else if (step === 2) { if (!/^\d{10}$/.test(idInput.value.trim())) { showError(2, "رقم الهوية يجب أن يتكون من 10 أرقام"); valid = false; } }
-          else if (step === 3) {
-            if (!/^05\d{8}$/.test(phoneInput.value.trim())) { showError(3, "صيغة الجوال غير صحيحة (e.g., 0512345678)"); valid = false; }
-            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) { showError(3, "صيغة البريد الإلكتروني غير صحيحة"); valid = false; }
-          }
-          return valid;
-        };
-        const submitExam = async (submitButton, examId) => {
-            clearInterval(timerInterval); submitButton.disabled = true; submitButton.innerHTML = '<span class="loader"></span> جاري الإرسال...';
-            const answers = examConfig.questions.map((q, i) => { const textarea = document.getElementById(`answer-${i}`); const answerText = textarea ? textarea.value.trim() : ""; const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length; return { question: q.text, answer: answerText, wordCount: wordCount }; });
-            const formData = { name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(), email: emailInput.value.trim(), examId: examId, answers: answers, submissionTime: serverTimestamp() };
-            try { await addDoc(collection(db, "Submissions"), formData); examCard.style.display = 'none'; successMessage.style.display = 'block'; } catch (e) { console.error("Error adding document: ", e); alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."); submitButton.disabled = false; submitButton.textContent = "إرسال الإجابة النهائية"; }
-        };
+      }
+    };
+    const showError = (step, msg) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = msg; };
+    const clearError = (step) => { if(document.getElementById(`err${step}`)) document.getElementById(`err${step}`).textContent = ''; };
+    const validateStep = (step) => {
+      clearError(step); let valid = true;
+      if (step === 1) { if (!/^[\u0600-\u06FF\s]+$/.test(nameInput.value.trim())) { showError(1, "الاسم مطلوب باللغة العربية"); valid = false; } }
+      else if (step === 2) { if (!/^\d{10}$/.test(idInput.value.trim())) { showError(2, "رقم الهوية يجب أن يتكون من 10 أرقام"); valid = false; } }
+      else if (step === 3) {
+        if (!/^05\d{8}$/.test(phoneInput.value.trim())) { showError(3, "صيغة الجوال غير صحيحة (e.g., 0512345678)"); valid = false; }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) { showError(3, "صيغة البريد الإلكتروني غير صحيحة"); valid = false; }
+      }
+      return valid;
+    };
+    const submitExam = async (submitButton, examId) => {
+        clearInterval(timerInterval); submitButton.disabled = true; submitButton.innerHTML = '<span class="loader"></span> جاري الإرسال...';
+        const answers = examConfig.questions.map((q, i) => { const textarea = document.getElementById(`answer-${i}`); const answerText = textarea ? textarea.value.trim() : ""; const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length; return { question: q.text, answer: answerText, wordCount: wordCount }; });
+        const formData = { name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(), email: emailInput.value.trim(), examId: examId, answers: answers, submissionTime: serverTimestamp() };
+        try { await addDoc(collection(db, "Submissions"), formData); examCard.style.display = 'none'; successMessage.style.display = 'block'; } catch (e) { console.error("Error adding document: ", e); alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."); submitButton.disabled = false; submitButton.textContent = "إرسال الإجابة النهائية"; }
+    };
 
-        async function loadExam(examId) {
-            const loadingDiv = document.getElementById('loading-exam');
-            try {
-                const docRef = doc(db, "Exams", examId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const examData = docSnap.data();
-                    if (!examData.isActive) { loadingDiv.innerHTML = '<h3 style="color:var(--error);">هذا الاختبار غير متاح حاليًا.</h3><p>يرجى مراجعة المشرف على الاختبار.</p>'; return; }
-                    examConfig = { id: examId, questions: examData.questions, timerMode: examData.timerMode || 'individual', totalDuration: examData.totalDuration || 0 };
-                    TOTAL_STEPS += examConfig.questions.length;
-                    document.getElementById('exam-title-display').textContent = examData.title;
-                    if (examConfig.timerMode === 'total') { document.getElementById('total-timer-container').style.display = 'block'; }
+    async function loadExam(examId) {
+        const loadingDiv = document.getElementById('loading-exam');
+        try {
+            const docRef = doc(db, "Exams", examId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const examData = docSnap.data();
+                if (!examData.isActive) { loadingDiv.innerHTML = '<h3 style="color:var(--error);">هذا الاختبار غير متاح حاليًا.</h3><p>يرجى مراجعة المشرف على الاختبار.</p>'; return; }
+                examConfig = { id: examId, questions: examData.questions, timerMode: examData.timerMode || 'individual', totalDuration: examData.totalDuration || 0 };
+                TOTAL_STEPS += examConfig.questions.length;
+                document.getElementById('exam-title-display').textContent = examData.title;
+                if (examConfig.timerMode === 'total') { document.getElementById('total-timer-container').style.display = 'block'; }
 
-                    examConfig.questions.forEach((q, i) => {
-                        const stepNum = i + 4; const isLast = (i === examConfig.questions.length - 1); const isFirstQuestion = (i === 0);
-                        const stepDiv = document.createElement('div'); stepDiv.className = 'step'; stepDiv.dataset.step = stepNum;
-                        const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
-                        const prevButtonHTML = !isFirstQuestion ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>` : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
-                        const nextButtonHTML = isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
-                        stepDiv.innerHTML = `<h3>السؤال ${i + 1} / ${examConfig.questions.length}</h3>${individualTimerHTML}<p style="font-size: 1.1em; line-height: 1.7;">${q.text}</p><textarea id="answer-${i}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea><div class="counter-wrapper"><div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div><div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div></div><div class="step-actions">${prevButtonHTML}${nextButtonHTML}</div>`;
-                        form.appendChild(stepDiv);
-                        
-                        const textarea = stepDiv.querySelector(`#answer-${i}`);
-                        const wordCountSpan = stepDiv.querySelector(`#wordCount-${i}`);
-                        const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
-                        const targetWordCount = q.wordCount;
-                        textarea.lastValue = '';
-                        textarea.addEventListener('input', () => {
-                            const currentValue = textarea.value;
-                            const charsAdded = currentValue.length - textarea.lastValue.length;
-                            if (charsAdded > 3) {
-                                textarea.value = textarea.lastValue;
-                                showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
-                                return;
-                            }
-                            textarea.lastValue = currentValue;
-                            const words = currentValue.trim().split(/\s+/).filter(w => w.length > 0);
-                            const currentWordCount = words.length;
-                            if (currentWordCount >= targetWordCount && !wordLimitToastShown[i]) {
-                                showToast('لقد وصلت إلى العدد المطلوب من الكلمات', 'success');
-                                wordLimitToastShown[i] = true;
-                            }
-                            wordCountSpan.textContent = currentWordCount;
-                            const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
-                            wordProgressBar.style.width = `${progress}%`;
-                            wordProgressBar.classList.toggle('completed', progress >= 100);
-                        });
+                examConfig.questions.forEach((q, i) => {
+                    const stepNum = i + 4; const isLast = (i === examConfig.questions.length - 1); const isFirstQuestion = (i === 0);
+                    const stepDiv = document.createElement('div'); stepDiv.className = 'step'; stepDiv.dataset.step = stepNum;
+                    const individualTimerHTML = examConfig.timerMode === 'individual' ? `<div class="timer">الوقت المتبقي: <span class="timer-span">${String(q.duration).padStart(2,'0')}:00</span></div>` : '';
+                    const prevButtonHTML = !isFirstQuestion ? `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">السابق</button>` : `<button type="button" class="btn-prev" data-prev="${stepNum - 1}">بيانات التواصل</button>`;
+                    const nextButtonHTML = isLast ? '<button type="submit">إرسال الإجابة النهائية</button>' : `<button type="button" data-next="${stepNum + 1}">السؤال التالي</button>`;
+                    stepDiv.innerHTML = `<h3>السؤال ${i + 1} / ${examConfig.questions.length}</h3>${individualTimerHTML}<p style="font-size: 1.1em; line-height: 1.7;">${q.text}</p><textarea id="answer-${i}" rows="10" placeholder="ابدأ الكتابة هنا..."></textarea><div class="counter-wrapper"><div class="word-progress-bar"><div class="word-progress-bar-inner" id="wpb-${i}"></div></div><div class="counter-text">عدد الكلمات: <span id="wordCount-${i}">0</span> / ${q.wordCount}</div></div><div class="step-actions">${prevButtonHTML}${nextButtonHTML}</div>`;
+                    form.appendChild(stepDiv);
+                    
+                    const textarea = stepDiv.querySelector(`#answer-${i}`);
+                    const wordCountSpan = stepDiv.querySelector(`#wordCount-${i}`);
+                    const wordProgressBar = stepDiv.querySelector(`#wpb-${i}`);
+                    const targetWordCount = q.wordCount;
+                    textarea.lastValue = '';
+                    textarea.addEventListener('input', () => {
+                        const currentValue = textarea.value;
+                        const charsAdded = currentValue.length - textarea.lastValue.length;
+                        if (charsAdded > 3) {
+                            textarea.value = textarea.lastValue;
+                            showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
+                            return;
+                        }
+                        textarea.lastValue = currentValue;
+                        const words = currentValue.trim().split(/\s+/).filter(w => w.length > 0);
+                        const currentWordCount = words.length;
+                        if (currentWordCount >= targetWordCount && !wordLimitToastShown[i]) {
+                            showToast('لقد وصلت إلى العدد المطلوب من الكلمات', 'success');
+                            wordLimitToastShown[i] = true;
+                        }
+                        wordCountSpan.textContent = currentWordCount;
+                        const progress = Math.min((currentWordCount / targetWordCount) * 100, 100);
+                        wordProgressBar.style.width = `${progress}%`;
+                        wordProgressBar.classList.toggle('completed', progress >= 100);
                     });
-                    loadingDiv.style.display = 'none';
-                    form.style.display = 'block';
-                    showStep(1);
-                } else { loadingDiv.innerHTML = '<h3 style="color:var(--error);">خطأ: الاختبار المطلوب غير موجود.</h3><p>يرجى التأكد من صحة الرابط.</p>'; }
-            } catch (error) { console.error("Error fetching exam:", error); loadingDiv.innerHTML = '<h3 style="color:var(--error);">حدث خطأ أثناء تحميل الاختبار.</h3><p>يرجى تحديث الصفحة.</p>'; }
-        }
-
-        form.addEventListener('paste', (e) => {
-            if (e.target.tagName === 'TEXTAREA') {
-                e.preventDefault();
-                showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
-            }
-        });
-
-        form.addEventListener('click', (e) => {
-            const nextBtn = e.target.closest('button[data-next]');
-            const prevBtn = e.target.closest('button[data-prev]');
-            if (nextBtn) { 
-                const currentStep = parseInt(nextBtn.closest('.step').dataset.step);
-                if (validateStep(currentStep)) { showStep(parseInt(nextBtn.dataset.next)); }
-            }
-            if (prevBtn) { showStep(parseInt(prevBtn.dataset.prev)); }
-        });
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const examId = urlParams.get('id');
-        form.addEventListener('submit', (e) => { e.preventDefault(); submitExam(e.target.querySelector('button[type="submit"]'), examId); });
-        
-        if (examId) { loadExam(examId); } 
-        else { document.getElementById('loading-exam').innerHTML = '<h3 style="color:var(--error);">خطأ: رابط الاختبار غير مكتمل.</h3><p>يجب أن يحتوي الرابط على ID الاختبار للبدء.</p>'; }
+                });
+                loadingDiv.style.display = 'none';
+                form.style.display = 'block';
+                showStep(1);
+            } else { loadingDiv.innerHTML = '<h3 style="color:var(--error);">خطأ: الاختبار المطلوب غير موجود.</h3><p>يرجى التأكد من صحة الرابط.</p>'; }
+        } catch (error) { console.error("Error fetching exam:", error); loadingDiv.innerHTML = '<h3 style="color:var(--error);">حدث خطأ أثناء تحميل الاختبار.</h3><p>يرجى تحديث الصفحة.</p>'; }
     }
+
+    form.addEventListener('paste', (e) => {
+        if (e.target.tagName === 'TEXTAREA') {
+            e.preventDefault();
+            showToast('رصد محاولة غش - سيتم وضع علامة على امتحانك اذا تم تكرار المحاولة');
+        }
+    });
+
+    form.addEventListener('click', (e) => {
+        const nextBtn = e.target.closest('button[data-next]');
+        const prevBtn = e.target.closest('button[data-prev]');
+        if (nextBtn) { 
+            const currentStep = parseInt(nextBtn.closest('.step').dataset.step);
+            if (validateStep(currentStep)) { showStep(parseInt(nextBtn.dataset.next)); }
+        }
+        if (prevBtn) { showStep(parseInt(prevBtn.dataset.prev)); }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const examId = urlParams.get('id');
+    form.addEventListener('submit', (e) => { e.preventDefault(); submitExam(e.target.querySelector('button[type="submit"]'), examId); });
+    
+    if (examId) { loadExam(examId); } 
+    else { document.getElementById('loading-exam').innerHTML = '<h3 style="color:var(--error);">خطأ: رابط الاختبار غير مكتمل.</h3><p>يجب أن يحتوي الرابط على ID الاختبار للبدء.</p>'; }
   </script>
 </body>
 </html>
