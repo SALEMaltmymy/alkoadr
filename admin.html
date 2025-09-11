@@ -40,8 +40,17 @@
     .exam-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .exam-card .card-header h3 { margin: 0; font-size: 1.15em; color: var(--brand-dark); line-height: 1.4; }
     .exam-card .card-meta { font-size: 0.85em; color: var(--muted); margin: 8px 0; }
-    .exam-card .card-actions { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background-color: #fafafa; border-top: 1px solid var(--border-color); }
     .exam-card .action-group { display: flex; gap: 10px; }
+    .exam-card .card-actions { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 15px 25px; 
+        background-color: #fafafa; 
+        border-top: 1px solid var(--border-color); 
+        flex-wrap: wrap; /* لجعل الأزرار تلتف في صفوف جديدة إذا كانت الشاشة صغيرة */
+        gap: 10px; /* لتقليل المسافات بين الأزرار عند التفافها */
+    }
     
     #submissions-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
     .submission-card { flex-direction: row; align-items: center; justify-content: space-between; padding: 20px; border-left: 5px solid var(--muted); }
@@ -98,7 +107,7 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <img src="tbok.png" alt="شعار جامعة تبوك">
+            <img src="Tbok2.svg" alt="شعار جامعة تبوك">
             <h2>لوحة التحكم</h2>
             <p>الرجاء إدخال كلمة المرور للوصول</p>
             <input type="password" id="password-input" placeholder="••••••••">
@@ -108,7 +117,7 @@
 
     <div id="admin-content" style="display: none;" class="container">
         <header class="site-header">
-            <img src="tbok.png" alt="شعار جامعة تبوك" class="logo">
+            <img src="Tbok2.svg" alt="شعار جامعة تبوك" class="logo">
             <h1>جامعة تبوك</h1>
             <h2>لوحة تحكم كوادر السلامة والصحة المهنية</h2>
         </header>
@@ -273,7 +282,7 @@
                 const exam = doc.data(); const examId = doc.id;
                 const card = document.createElement('div'); card.className = 'card exam-card';
                 card.style.animationDelay = `${index * 50}ms`;
-                card.innerHTML = `<div class="card-content"><div class="card-header"><h3>${exam.title}</h3><div class="status-control"><span class="status-text ${exam.isActive ? 'active' : 'inactive'}">${exam.isActive ? 'فعال' : 'موقوف'}</span><label class="toggle-switch"><input type="checkbox" class="toggle-status-btn" data-exam-id="${examId}" ${exam.isActive ? 'checked' : ''}><span class="slider"></span></label></div></div><p class="card-meta">(${exam.questions.length} أسئلة) &bull; ${new Date(exam.createdAt?.toDate()).toLocaleDateString('ar-SA')}</p></div><div class="card-actions"><div class="action-group"><button class="copy-link-btn" data-link="${BASE_URL}/exam.html?id=${examId}">نسخ</button><button class="view-submissions-btn" data-exam-id="${examId}" data-exam-title="${exam.title}">الإجابات</button></div><button class="delete-exam-btn btn-icon" data-exam-id="${examId}" title="حذف الاختبار"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted);"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-6 5v6m4-6v6"/></svg></button></div>`;
+                card.innerHTML = `<div class="card-content"><div class="card-header"><h3>${exam.title}</h3><div class="status-control"><span class="status-text ${exam.isActive ? 'active' : 'inactive'}">${exam.isActive ? 'فعال' : 'موقوف'}</span><label class="toggle-switch"><input type="checkbox" class="toggle-status-btn" data-exam-id="${examId}" ${exam.isActive ? 'checked' : ''}><span class="slider"></span></label></div></div><p class="card-meta">(${exam.questions.length} أسئلة) &bull; ${new Date(exam.createdAt?.toDate()).toLocaleDateString('ar-SA')}</p></div><div class="card-actions"><div class="action-group"><button class="copy-link-btn" data-link="${BASE_URL}/exam.html?id=${examId}">نسخ</button><button class="view-submissions-btn" data-exam-id="${examId}" data-exam-title="${exam.title}">الإجابات</button><button class="share-submissions-btn" data-exam-id="${examId}" data-link="${BASE_URL}/jmil.html?examId=${examId}">مشاركة</button></div><button class="delete-exam-btn btn-danger" data-exam-id="${examId}" title="حذف الاختبار"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-6 5v6m4-6v6"/></svg></button></div>`;
                 examsListContainer.appendChild(card);
             });
         } catch (error) { console.error("Error loading exams:", error); examsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p>حدث خطأ في تحميل الاختبارات.</p></div>'; }
@@ -319,7 +328,33 @@
     confirmDeleteBtn.addEventListener('click', executeDelete);
     cancelDeleteBtn.addEventListener('click', () => { deleteConfirmModal.style.display = 'none'; itemToDelete = null; });
 
-    examsListContainer.addEventListener('click', (e) => { const button = e.target.closest('button'); const toggle = e.target.closest('.toggle-status-btn'); if (button?.classList.contains('copy-link-btn')) { navigator.clipboard.writeText(button.dataset.link); button.textContent = 'تم النسخ!'; setTimeout(() => { button.textContent = 'نسخ'; }, 2000); } if (button?.classList.contains('view-submissions-btn')) { examsView.classList.add('hidden'); submissionsView.classList.remove('hidden'); loadSubmissions(button.dataset.examId, button.dataset.examTitle); } if (button?.classList.contains('delete-exam-btn')) { handleDeleteExam(button.dataset.examId); } if (toggle) { const statusText = toggle.closest('.status-control').querySelector('.status-text'); handleToggleStatus(toggle.dataset.examId, toggle.checked, statusText); } });
+    examsListContainer.addEventListener('click', (e) => { 
+        const button = e.target.closest('button'); 
+        const toggle = e.target.closest('.toggle-status-btn'); 
+        if (button?.classList.contains('copy-link-btn')) { 
+            navigator.clipboard.writeText(button.dataset.link); 
+            button.textContent = 'تم النسخ!'; 
+            setTimeout(() => { button.textContent = 'نسخ'; }, 2000); 
+        } 
+        if (button?.classList.contains('view-submissions-btn')) { 
+            examsView.classList.add('hidden'); 
+            submissionsView.classList.remove('hidden'); 
+            loadSubmissions(button.dataset.examId, button.dataset.examTitle); 
+        } 
+        if (button?.classList.contains('share-submissions-btn')) {
+            const link = button.dataset.link;
+            navigator.clipboard.writeText(link);
+            button.textContent = 'تم النسخ!';
+            setTimeout(() => { button.textContent = 'مشاركة'; }, 2000);
+        }
+        if (button?.classList.contains('delete-exam-btn')) { 
+            handleDeleteExam(button.dataset.examId); 
+        } 
+        if (toggle) { 
+            const statusText = toggle.closest('.status-control').querySelector('.status-text'); 
+            handleToggleStatus(toggle.dataset.examId, toggle.checked, statusText); 
+        } 
+    });
     
     backToExamsBtn.addEventListener('click', () => { submissionsView.classList.add('hidden'); examsView.classList.remove('hidden'); });
     
