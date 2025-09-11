@@ -17,7 +17,7 @@
     body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 0; }
     .container { width: min(650px, 92%); margin: auto; }
     
-    #device-restriction-overlay {
+    #device-restriction-overlay, #restart-restriction-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background-color: var(--bg); flex-direction: column; justify-content: center;
       align-items: center; text-align: center; padding: 20px; z-index: 9999;
@@ -77,6 +77,16 @@
         <p>لضمان أفضل تجربة اختبار، يرجى استخدام جهاز كمبيوتر مكتبي أو لابتوب لإجراء هذا الاختبار.</p>
     </div>
   </div>
+  
+  <div id="restart-restriction-overlay">
+    <div class="restriction-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1-5.5h-2c-1.1 0-2 .9-2 2v1c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2z"></path>
+        </svg>
+        <h2>لا يمكن إعادة الاختبار</h2>
+        <p>لقد بدأت الاختبار بالفعل. لا يمكنك إعادة التشغيل من البداية بعد بدء الوقت. يرجى إكمال الاختبار.</p>
+    </div>
+  </div>
 
   <div class="container">
     <header class="site-header">
@@ -105,7 +115,7 @@
       </form>
     </div>
     <div class="card" id="success-message" style="display: none;">
-        <div class="icon">&#10004;</div><h2 style="color: var(--success-color);">تم الإرسال بنجاح!</h2><p>شكرًا لك على إتمام الاختبار. سيتم مراجعة إجابتك والتواصل معك قريبًا.</p>
+        <div class="icon">&#10004;</div><h2 style="color: var(--success);">تم الإرسال بنجاح!</h2><p>شكرًا لك على إتمام الاختبار. سيتم مراجعة إجابتك والتواصل معك قريبًا.</p>
     </div>
     <footer class="credit"><p>اعداد/المهندس خالد الغامدي</p></footer>
   </div>
@@ -113,21 +123,31 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     function isMobileDevice() {
-        // ✅ الكود الجديد والأكثر دقة: يركز على الكلمات الدالة على الجوالات والأجهزة اللوحية
         const userAgent = navigator.userAgent;
-        // iPad Pro user agent might not contain "Mobi", so we check for touch capability as a secondary measure for tablets.
         const isTablet = /iPad|Android(?!.*Mobi)/i.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isMobile = /Mobi|Android|iPhone/i.test(userAgent);
         return isMobile || isTablet;
     }
+    
+    // ✅ الكود الجديد: فحص حالة الاختبار الحالية في LocalStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const examId = urlParams.get('id');
+    const examSessionKey = `examSession-${examId}`;
+    const storedSession = localStorage.getItem(examSessionKey);
 
     if (isMobileDevice()) {
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.container').style.display = 'none';
             document.getElementById('device-restriction-overlay').style.display = 'flex';
+        });
+    } else if (storedSession) {
+        // ✅ الكود الجديد: إذا كان هناك جلسة سابقة، أظهر رسالة المنع
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.container').style.display = 'none';
+            document.getElementById('restart-restriction-overlay').style.display = 'flex';
         });
     } else {
         const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
@@ -147,6 +167,7 @@
         let TOTAL_STEPS = 3;
         let examConfig = {};
         let wordLimitToastShown = {};
+        let submissionDocId = null; 
 
         function showToast(message, type = 'error') {
             const toastContainer = document.getElementById('toast-container');
@@ -163,6 +184,14 @@
         
         const updateProgress = (step) => { progressBar.parentElement.style.display = 'block'; progressBar.style.width = `${((step - 1) / TOTAL_STEPS) * 100}%`; };
         const startTimer = (durationInSeconds, display, onTimeUp) => { clearInterval(timerInterval); let timer = durationInSeconds; timerInterval = setInterval(() => { let minutes = Math.floor(timer / 60).toString().padStart(2, '0'); let seconds = (timer % 60).toString().padStart(2, '0'); display.textContent = `${minutes}:${seconds}`; if (--timer < 0) { clearInterval(timerInterval); onTimeUp(); } }, 1000); };
+        
+        async function updateSubmissionStatus(status, data = {}) {
+            if (submissionDocId) {
+                const docRef = doc(db, "Submissions", submissionDocId);
+                await updateDoc(docRef, { status: status, ...data });
+            }
+        }
+        
         const showStep = (stepNumber) => {
           document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
           const stepToShow = document.querySelector(`.step[data-step="${stepNumber}"]`);
@@ -175,6 +204,7 @@
                 const onTimeUp = () => { stepToShow.querySelector('textarea').disabled = true; stepToShow.querySelector('button[data-next], button[type="submit"]').click(); };
                 startTimer(question.duration * 60, timerSpan, onTimeUp);
             } else if (examConfig.timerMode === 'total' && stepNumber === 4 && !timerInterval) {
+                updateSubmissionStatus('in-progress');
                 const totalTimerSpan = document.getElementById('total-timer-span');
                 const onTimeUp = () => { form.querySelectorAll('textarea').forEach(ta => ta.disabled = true); submitExam(form.querySelector('button[type="submit"]'), examConfig.id); };
                 startTimer(examConfig.totalDuration * 60, totalTimerSpan, onTimeUp);
@@ -193,13 +223,33 @@
           }
           return valid;
         };
+
+        const startExamSession = async (examId) => {
+            const formData = { name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(), email: emailInput.value.trim(), examId: examId, submissionTime: serverTimestamp(), status: 'in-progress' };
+            const docRef = await addDoc(collection(db, "Submissions"), formData);
+            submissionDocId = docRef.id;
+            // ✅ الكود الجديد: حفظ الجلسة في LocalStorage
+            localStorage.setItem(examSessionKey, submissionDocId);
+            return submissionDocId;
+        };
+        
         const submitExam = async (submitButton, examId) => {
             clearInterval(timerInterval); submitButton.disabled = true; submitButton.innerHTML = '<span class="loader"></span> جاري الإرسال...';
             const answers = examConfig.questions.map((q, i) => { const textarea = document.getElementById(`answer-${i}`); const answerText = textarea ? textarea.value.trim() : ""; const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length; return { question: q.text, answer: answerText, wordCount: wordCount }; });
-            const formData = { name: nameInput.value.trim(), idNumber: idInput.value.trim(), phone: phoneInput.value.trim(), email: emailInput.value.trim(), examId: examId, answers: answers, submissionTime: serverTimestamp() };
-            try { await addDoc(collection(db, "Submissions"), formData); examCard.style.display = 'none'; successMessage.style.display = 'block'; } catch (e) { console.error("Error adding document: ", e); alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."); submitButton.disabled = false; submitButton.textContent = "إرسال الإجابة النهائية"; }
+            try { 
+                await updateSubmissionStatus('submitted', { answers: answers });
+                examCard.style.display = 'none'; 
+                successMessage.style.display = 'block';
+                // ✅ الكود الجديد: حذف الجلسة من LocalStorage بعد الإرسال
+                localStorage.removeItem(examSessionKey);
+            } catch (e) { 
+                console.error("Error adding document: ", e); 
+                alert("❌ حدث خطأ أثناء الإرسال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."); 
+                submitButton.disabled = false; 
+                submitButton.textContent = "إرسال الإجابة النهائية"; 
+            }
         };
-
+        
         async function loadExam(examId) {
             const loadingDiv = document.getElementById('loading-exam');
             try {
@@ -212,7 +262,7 @@
                     TOTAL_STEPS += examConfig.questions.length;
                     document.getElementById('exam-title-display').textContent = examData.title;
                     if (examConfig.timerMode === 'total') { document.getElementById('total-timer-container').style.display = 'block'; }
-
+                    
                     examConfig.questions.forEach((q, i) => {
                         const stepNum = i + 4; const isLast = (i === examConfig.questions.length - 1); const isFirstQuestion = (i === 0);
                         const stepDiv = document.createElement('div'); stepDiv.className = 'step'; stepDiv.dataset.step = stepNum;
@@ -262,18 +312,25 @@
             }
         });
 
-        form.addEventListener('click', (e) => {
+        form.addEventListener('click', async (e) => {
             const nextBtn = e.target.closest('button[data-next]');
             const prevBtn = e.target.closest('button[data-prev]');
             if (nextBtn) { 
                 const currentStep = parseInt(nextBtn.closest('.step').dataset.step);
-                if (validateStep(currentStep)) { showStep(parseInt(nextBtn.dataset.next)); }
+                if (validateStep(currentStep)) { 
+                    if (currentStep === 3) {
+                        nextBtn.disabled = true;
+                        nextBtn.innerHTML = '<span class="loader"></span> جاري البدء...';
+                        await startExamSession(examId);
+                        nextBtn.disabled = false;
+                        nextBtn.innerHTML = 'بدء الاختبار';
+                    }
+                    showStep(parseInt(nextBtn.dataset.next)); 
+                }
             }
             if (prevBtn) { showStep(parseInt(prevBtn.dataset.prev)); }
         });
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const examId = urlParams.get('id');
         form.addEventListener('submit', (e) => { e.preventDefault(); submitExam(e.target.querySelector('button[type="submit"]'), examId); });
         
         if (examId) { loadExam(examId); } 
