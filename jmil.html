@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عرض إجابات الطلاب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #1e88e5; --brand-dark: #1565c0; --brand-light: #e3f2fd;
+      --bg: #f4f7f9; --card-bg: #ffffff; --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      --ink: #0f172a; --muted: #6b7280; --border-color: #e5e7eb;
+      --error: #ef4444; --error-dark: #dc2626; --success: #22c55e;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
+    body { margin: 0; font-family: "Tajawal", sans-serif; background-color: var(--bg); color: var(--ink); line-height: 1.6; }
+    .container { width: min(1200px, 94%); margin: 20px auto; padding: 20px 0; }
+    
+    .site-header { text-align: center; margin-bottom: 30px; }
+    .site-header .logo { max-width: 90px; height: auto; margin-bottom: 15px; }
+    .site-header h1 { font-weight: 800; color: var(--brand-dark); margin: 0 0 5px 0; font-size: 2.2em; }
+    .site-header h2 { font-weight: 700; color: var(--ink); margin: 0; font-size: 1.3em; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .page-header h1, .page-header h2 { margin: 0; font-size: 2em; color: var(--ink); }
+    .card { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    .credit { text-align: center; color: #6b7280; font-size: 14px; margin-top: 40px;}
+    
+    #submissions-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
+    .submission-card { flex-direction: row; align-items: center; justify-content: space-between; padding: 20px; border-left: 5px solid var(--muted); }
+    .student-profile { display: flex; align-items: center; gap: 15px; text-align: right; }
+    .student-profile img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .student-profile .info h3 { margin: 0 0 4px 0; font-size: 1.1em; color: var(--ink); }
+    .student-profile .info p { margin: 0; color: var(--muted); font-size: 0.9em; }
+    
+    button, .btn-as-link { background: var(--brand); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    button:hover, .btn-as-link:hover { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .card, .submission-card { opacity: 0; animation: card-fade-in 0.5s ease-out forwards; }
+    @keyframes card-fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 850px) {
+      #submissions-list-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="site-header">
+            <img src="tbok.png" alt="شعار جامعة تبوك" class="logo">
+            <h1>إجابات الطلاب</h1>
+            <h2 id="page-subtitle"></h2>
+        </header>
+        <main>
+            <div id="submissions-list-container"></div>
+        </main>
+        <footer class="credit"><p>اعداد/المهندس خالد الغامدي</p></footer>
+    </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+    // تأكد من تحديث هذه القيم بمعلومات مشروعك في Firebase
+    const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    const submissionsListContainer = document.getElementById('submissions-list-container');
+    const pageSubtitle = document.getElementById('page-subtitle');
+    
+    // استخراج معرّف الاختبار من رابط الصفحة (URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const examId = urlParams.get('examId');
+    
+    async function getExamTitle(examId) {
+      const examDocRef = doc(db, "Exams", examId);
+      const examDoc = await getDoc(examDocRef);
+      return examDoc.exists() ? examDoc.data().title : "الاختبار غير موجود";
+    }
+
+    async function loadSubmissions() {
+      if (!examId) {
+        pageSubtitle.textContent = 'لم يتم تحديد اختبار للعرض.';
+        submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>الرجاء التأكد من وجود examId في رابط الصفحة.</p></div>';
+        return;
+      }
+      
+      const examTitle = await getExamTitle(examId);
+      pageSubtitle.textContent = `إجابات اختبار: ${examTitle}`;
+      
+      submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>جاري تحميل الإجابات...</p></div>';
+      
+      try {
+        const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        submissionsListContainer.innerHTML = querySnapshot.empty ? '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>' : '';
+        
+        querySnapshot.forEach((doc, index) => {
+          const sub = doc.data();
+          const subId = doc.id;
+          const studentName = sub.name || "طالب غير معروف";
+          const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`;
+          
+          const card = document.createElement('div');
+          card.className = 'card submission-card';
+          card.style.animationDelay = `${index * 50}ms`;
+          card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`;
+          submissionsListContainer.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error("Error loading submissions: ", error);
+        submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; border-color: var(--error); padding: 20px;"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات. تأكد من أن الفهرس (Index) المطلوب تم إنشاؤه في Firestore.</p></div>';
+      }
+    }
+    
+    // تحميل الإجابات عند تحميل الصفحة
+    loadSubmissions();
+  </script>
+</body>
+    </html>
