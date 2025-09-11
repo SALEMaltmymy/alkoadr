@@ -182,6 +182,14 @@
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                
+                // ✅ الكود الجديد: فحص حالة الطالب
+                if (data.status === 'in-progress') {
+                    displayState('error', '⚠️ الطالب مازال في الاختبار. لا توجد إجابات للعرض حتى الآن.');
+                    document.getElementById('delete-btn').disabled = true;
+                    return;
+                }
+                
                 document.getElementById('student-name').textContent = data.name || 'غير متوفر';
                 document.getElementById('student-id').textContent = data.idNumber || 'غير متوفر';
                 document.getElementById('student-phone').textContent = data.phone || 'غير متوفر';
@@ -197,7 +205,10 @@
                         answerBlock.innerHTML = `<div class="answer-header"><h3>السؤال ${index + 1}: ${item.question}</h3><span class="word-count-badge">عدد الكلمات: ${item.wordCount}</span></div><div class="answer-text">${(item.answer || "").replace(/\n/g, '<br>') || '<em>لم تتم الإجابة.</em>'}</div>`;
                         answersContainer.appendChild(answerBlock);
                     });
+                } else {
+                    answersContainer.innerHTML = `<div class="status-card" style="box-shadow: none;"><p>لا توجد إجابات لهذا الاختبار. ربما لم يتم إرساله.</p></div>`;
                 }
+
                 const reviewBtn = document.createElement('button');
                 reviewBtn.id = 'review-btn';
                 updateReviewButton(reviewBtn, data.isReviewed || false);
