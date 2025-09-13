@@ -51,13 +51,16 @@
         </header>
         <main>
             <div id="submissions-list-container"></div>
+            <div id="load-more-container" style="text-align: center; margin-top: 25px; display: none;">
+                <button id="load-more-btn">عرض المزيد</button>
+            </div>
         </main>
         <footer class="credit"><p>اعداد/المهندس خالد الغامدي</p></footer>
     </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy, where, startAfter, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
     // تأكد من تحديث هذه القيم بمعلومات مشروعك في Firebase
     const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
@@ -66,8 +69,13 @@
     
     const submissionsListContainer = document.getElementById('submissions-list-container');
     const pageSubtitle = document.getElementById('page-subtitle');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const loadMoreContainer = document.getElementById('load-more-container');
     
-    // استخراج معرّف الاختبار من رابط الصفحة (URL)
+    const BATCH_SIZE = 3;
+    let lastVisible = null;
+    let isLoading = false;
+    
     const urlParams = new URLSearchParams(window.location.search);
     const examId = urlParams.get('examId');
     
@@ -78,45 +86,77 @@
     }
 
     async function loadSubmissions() {
-      if (!examId) {
-        pageSubtitle.textContent = 'لم يتم تحديد اختبار للعرض.';
-        submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>الرجاء التأكد من وجود examId في رابط الصفحة.</p></div>';
-        return;
-      }
-      
-      const examTitle = await getExamTitle(examId);
-      pageSubtitle.textContent = `إجابات اختبار: ${examTitle}`;
-      
-      submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>جاري تحميل الإجابات...</p></div>';
+      if (isLoading) return;
+      isLoading = true;
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.innerHTML = '<span class="loader"></span> جاري التحميل...';
       
       try {
-        const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"));
+        let q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"), limit(BATCH_SIZE));
+        if (lastVisible) {
+            q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"), startAfter(lastVisible), limit(BATCH_SIZE));
+        }
+
         const querySnapshot = await getDocs(q);
+        const newSubmissions = querySnapshot.docs;
         
-        submissionsListContainer.innerHTML = querySnapshot.empty ? '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>' : '';
+        if (newSubmissions.length > 0) {
+            if (!lastVisible) {
+                // This is the first load
+                submissionsListContainer.innerHTML = '';
+            }
+            newSubmissions.forEach((doc, index) => {
+                const sub = doc.data();
+                const subId = doc.id;
+                const studentName = sub.name || "طالب غير معروف";
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`;
+                
+                const card = document.createElement('div');
+                card.className = 'card submission-card';
+                card.style.animationDelay = `${index * 50}ms`;
+                card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`;
+                submissionsListContainer.appendChild(card);
+            });
+            lastVisible = newSubmissions[newSubmissions.length - 1];
+            loadMoreContainer.style.display = 'block';
+        }
+
+        if (newSubmissions.length < BATCH_SIZE) {
+            // No more submissions to load
+            loadMoreContainer.style.display = 'none';
+        }
         
-        querySnapshot.forEach((doc, index) => {
-          const sub = doc.data();
-          const subId = doc.id;
-          const studentName = sub.name || "طالب غير معروف";
-          const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`;
-          
-          const card = document.createElement('div');
-          card.className = 'card submission-card';
-          card.style.animationDelay = `${index * 50}ms`;
-          // يتم عرض الاسم ورقم الهوية فقط، مع رابط لعرض التفاصيل الكاملة
-          card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`;
-          submissionsListContainer.appendChild(card);
-        });
+        if (querySnapshot.empty && !lastVisible) {
+            // First load and no submissions found
+            submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>';
+            loadMoreContainer.style.display = 'none';
+        }
 
       } catch (error) {
         console.error("Error loading submissions: ", error);
-        submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; border-color: var(--error); padding: 20px;"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات. تأكد من أن الفهرس (Index) المطلوب تم إنشاؤه في Firestore.</p></div>';
+        submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; border-color: var(--error); padding: 20px;"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات.</p></div>';
+      } finally {
+        isLoading = false;
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = 'عرض المزيد';
       }
     }
     
-    // تحميل الإجابات عند تحميل الصفحة
-    loadSubmissions();
+    async function initializePage() {
+        if (!examId) {
+            pageSubtitle.textContent = 'لم يتم تحديد اختبار للعرض.';
+            submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>الرجاء التأكد من وجود examId في رابط الصفحة.</p></div>';
+            return;
+        }
+        const examTitle = await getExamTitle(examId);
+        pageSubtitle.textContent = `إجابات اختبار: ${examTitle}`;
+        submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>جاري تحميل الإجابات...</p></div>';
+        loadSubmissions();
+    }
+    
+    loadMoreBtn.addEventListener('click', loadSubmissions);
+    
+    initializePage();
   </script>
 </body>
 </html>
