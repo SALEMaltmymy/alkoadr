@@ -92,6 +92,7 @@
       submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center; padding: 20px;"><p>جاري تحميل الإجابات...</p></div>';
       
       try {
+        // استعلام لجلب جميع الإجابات بدون تحديد عدد
         const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"));
         const querySnapshot = await getDocs(q);
         
