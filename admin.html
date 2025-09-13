@@ -48,8 +48,8 @@
         padding: 15px 25px; 
         background-color: #fafafa; 
         border-top: 1px solid var(--border-color); 
-        flex-wrap: wrap; /* لجعل الأزرار تلتف في صفوف جديدة إذا كانت الشاشة صغيرة */
-        gap: 10px; /* لتقليل المسافات بين الأزرار عند التفافها */
+        flex-wrap: wrap; 
+        gap: 10px; 
     }
     
     #submissions-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
@@ -76,7 +76,7 @@
     .close-btn { font-size: 28px; line-height: 1; border: none; background: none; cursor: pointer; }
     .question-block { border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-top: 15px; background: #fafafa; }
     #delete-confirm-modal .modal-content { width: min(450px, 90%); }
-    #delete-confirm-modal .modal-actions { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+    .modal-actions { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
     .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
@@ -107,7 +107,7 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <img src="Tbok2.svg" alt="شعار جامعة تبوك">
+            <img src="https://placehold.co/80x80/285579/fff?text=T" alt="شعار جامعة تبوك">
             <h2>لوحة التحكم</h2>
             <p>الرجاء إدخال كلمة المرور للوصول</p>
             <input type="password" id="password-input" placeholder="••••••••">
@@ -117,7 +117,7 @@
 
     <div id="admin-content" style="display: none;" class="container">
         <header class="site-header">
-            <img src="Tbok2.svg" alt="شعار جامعة تبوك" class="logo">
+            <img src="https://placehold.co/90x90/285579/fff?text=T" alt="شعار جامعة تبوك" class="logo">
             <h1>جامعة تبوك</h1>
             <h2>لوحة تحكم كوادر السلامة والصحة المهنية</h2>
         </header>
@@ -128,7 +128,13 @@
             </div>
             <div id="submissions-view" class="view hidden">
                 <div class="page-header"><h2 id="submissions-title"></h2><button id="back-to-exams-btn" class="btn-secondary">&larr; العودة</button></div>
-                <div id="submissions-list-container"></div>
+                <!-- حاوية الإجابات وزر "تحميل المزيد" -->
+                <div id="submissions-container">
+                    <div id="submissions-list-container"></div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button id="load-more-btn" style="display: none;">تحميل المزيد</button>
+                    </div>
+                </div>
             </div>
         </main>
         <footer class="credit"><p>اعداد/المهندس خالد الغامدي</p></footer>
@@ -164,8 +170,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
+    // يرجى استخدام Firebase Config الخاص بك
     const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -182,7 +189,7 @@
             sessionStorage.setItem('adminLoggedIn', 'true');
             checkLogin();
         } else {
-            alert('كلمة المرور غير صحيحة');
+            showNotification('كلمة المرور غير صحيحة', 'error');
         }
     }
 
@@ -217,14 +224,28 @@
     const notificationArea = document.getElementById('notification-area');
     const timerModeRadios = document.querySelectorAll('input[name="timerMode"]');
     const totalDurationContainer = document.getElementById('total-duration-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const SUBMISSIONS_PER_PAGE = 3;
+
     let questionCount = 0;
     let itemToDelete = null;
+    let lastVisible = null; // متغير لتتبع آخر مستند تم تحميله للترقيم
+    let currentExamId = null;
 
     document.getElementById('show-create-exam-modal-btn').addEventListener('click', () => createExamModal.style.display = 'flex');
     document.querySelector('#create-exam-modal .close-btn').addEventListener('click', () => createExamModal.style.display = 'none');
+    document.querySelector('#delete-confirm-modal .close-btn')?.addEventListener('click', () => deleteConfirmModal.style.display = 'none');
 
     timerModeRadios.forEach(radio => { radio.addEventListener('change', (e) => { const isTotalMode = e.target.value === 'total'; totalDurationContainer.style.display = isTotalMode ? 'block' : 'none'; document.querySelectorAll('.duration-input-container').forEach(c => { c.style.display = isTotalMode ? 'none' : 'block'; }); }); });
-    const showNotification = (message, type) => { const notif = Object.assign(document.createElement('div'), { className: `notification ${type}`, textContent: message }); notificationArea.innerHTML = ''; notificationArea.appendChild(notif); notificationArea.style.display = 'block'; setTimeout(() => { notif.style.display = 'none'; }, 4000); };
+    
+    const showNotification = (message, type) => { 
+        const notif = Object.assign(document.createElement('div'), { className: `notification ${type}`, textContent: message }); 
+        notificationArea.innerHTML = ''; 
+        notificationArea.appendChild(notif); 
+        notificationArea.style.display = 'block'; 
+        setTimeout(() => { notif.style.display = 'none'; }, 4000); 
+    };
+    
     const updateButtons = () => { removeQuestionBtn.style.display = (questionCount > 0) ? 'inline-block' : 'none'; };
     
     addQuestionBtn.addEventListener('click', () => {
@@ -268,6 +289,7 @@
             await addDoc(collection(db, "Exams"), examData);
             examTitleInput.value = ''; questionsContainer.innerHTML = ''; questionCount = 0;
             updateButtons(); createExamModal.style.display = 'none'; loadExams();
+            showNotification('تم حفظ الاختبار بنجاح.', 'success');
         } catch (error) { showNotification('حدث خطأ أثناء الحفظ في قاعدة البيانات.', 'error'); console.error(error); } 
         finally { saveExamBtn.disabled = false; saveExamBtn.textContent = 'حفظ الاختبار'; }
     });
@@ -288,24 +310,89 @@
         } catch (error) { console.error("Error loading exams:", error); examsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p>حدث خطأ في تحميل الاختبارات.</p></div>'; }
     }
     
+    // دالة بدء تحميل الإجابات
     async function loadSubmissions(examId, examTitle) {
         submissionsTitle.textContent = `إجابات اختبار: ${examTitle}`;
         submissionsListContainer.innerHTML = '<div class="card" style="text-align:center;"><p>جاري تحميل الإجابات...</p></div>';
+        
+        currentExamId = examId; // تخزين examId في متغير عالمي
+        lastVisible = null; // إعادة تعيين آخر مستند
+        
         try {
-            const q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"));
+            // استعلام للحصول على أول 3 إجابات
+            const submissionsRef = collection(db, "Submissions");
+            const q = query(submissionsRef, where("examId", "==", examId), orderBy("submissionTime", "desc"), limit(SUBMISSIONS_PER_PAGE));
             const querySnapshot = await getDocs(q);
-            submissionsListContainer.innerHTML = querySnapshot.empty ? '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>' : '';
-            querySnapshot.forEach((doc, index) => {
-                const sub = doc.data(); const subId = doc.id; const studentName = sub.name || "طالب غير معروف"; const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`;
-                const card = document.createElement('div'); card.className = 'card submission-card';
-                card.style.animationDelay = `${index * 50}ms`;
-                card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`;
-                submissionsListContainer.appendChild(card);
-            });
-        } catch (error) { console.error("Error loading submissions: ", error); submissionsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات. تأكد من أن الفهرس (Index) المطلوب تم إنشاؤه في Firestore.</p></div>'; }
+
+            await renderSubmissions(querySnapshot, false); // عرض الدفعة الأولى
+        } catch (error) { 
+            console.error("Error loading submissions: ", error); 
+            submissionsListContainer.innerHTML = '<div class="card" style="border-color: var(--error);"><p style="color: var(--error);">حدث خطأ أثناء تحميل الإجابات. تأكد من أن الفهرس (Index) المطلوب تم إنشاؤه في Firestore.</p></div>'; 
+        }
+    }
+    
+    // دالة تحميل المزيد من الإجابات
+    async function loadMoreSubmissions() {
+        if (!lastVisible) {
+            loadMoreBtn.style.display = 'none';
+            return;
+        }
+
+        loadMoreBtn.innerHTML = '<span class="loader"></span> جاري التحميل...';
+        loadMoreBtn.disabled = true;
+
+        try {
+            const submissionsRef = collection(db, "Submissions");
+            // استعلام للحصول على الـ 3 إجابات التالية بعد آخر مستند
+            const q = query(submissionsRef, where("examId", "==", currentExamId), orderBy("submissionTime", "desc"), startAfter(lastVisible), limit(SUBMISSIONS_PER_PAGE));
+            const querySnapshot = await getDocs(q);
+
+            await renderSubmissions(querySnapshot, true); // إضافة الدفعة الجديدة
+        } catch (error) {
+            console.error("Error loading more submissions: ", error);
+            showNotification('فشل تحميل المزيد من الإجابات.', 'error');
+        } finally {
+            loadMoreBtn.innerHTML = 'تحميل المزيد';
+            loadMoreBtn.disabled = false;
+        }
     }
 
-    async function handleToggleStatus(examId, newStatus, statusTextElement) { try { await updateDoc(doc(db, "Exams", examId), { isActive: newStatus }); statusTextElement.textContent = newStatus ? 'فعال' : 'موقوف'; statusTextElement.className = `status-text ${newStatus ? 'active' : 'inactive'}`; } catch (error) { console.error("Error updating status: ", error); alert("فشل تحديث حالة الاختبار."); const checkbox = document.querySelector(`.toggle-status-btn[data-exam-id="${examId}"]`); if(checkbox) checkbox.checked = !newStatus; } }
+    async function renderSubmissions(querySnapshot, append = false) {
+        if (!append) {
+            submissionsListContainer.innerHTML = '';
+        }
+
+        if (querySnapshot.empty && !append) {
+            submissionsListContainer.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>لا توجد أي إجابات لهذا الاختبار حتى الآن.</p></div>';
+            loadMoreBtn.style.display = 'none';
+            return;
+        }
+
+        querySnapshot.forEach((doc, index) => {
+            const sub = doc.data(); 
+            const subId = doc.id; 
+            const studentName = sub.name || "طالب غير معروف"; 
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName.charAt(0))}&background=random&color=fff&size=50`;
+            const card = document.createElement('div'); 
+            card.className = 'card submission-card';
+            card.style.animationDelay = `${index * 50}ms`;
+            card.innerHTML = `<div class="student-profile"><img src="${avatarUrl}" alt="Avatar"><div class="info"><h3>${studentName}</h3><p>رقم الهوية: ${sub.idNumber || 'غير متوفر'}</p></div></div><a href="Exhibition.html?id=${subId}" class="btn-as-link details-btn">التفاصيل</a>`;
+            submissionsListContainer.appendChild(card);
+        });
+
+        // تحديث آخر مستند مرئي
+        lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+        // إظهار أو إخفاء زر "تحميل المزيد"
+        if (querySnapshot.docs.length < SUBMISSIONS_PER_PAGE) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'block';
+        }
+    }
+    
+
+    async function handleToggleStatus(examId, newStatus, statusTextElement) { try { await updateDoc(doc(db, "Exams", examId), { isActive: newStatus }); statusTextElement.textContent = newStatus ? 'فعال' : 'موقوف'; statusTextElement.className = `status-text ${newStatus ? 'active' : 'inactive'}`; } catch (error) { console.error("Error updating status: ", error); showNotification("فشل تحديث حالة الاختبار.", 'error'); const checkbox = document.querySelector(`.toggle-status-btn[data-exam-id="${examId}"]`); if(checkbox) checkbox.checked = !newStatus; } }
     
     function handleDeleteExam(examId) {
         itemToDelete = { id: examId, type: 'exam' };
@@ -321,12 +408,16 @@
         try {
             if (type === 'exam') { await deleteDoc(doc(db, "Exams", id)); loadExams(); }
             deleteConfirmModal.style.display = 'none';
-        } catch (error) { console.error(`Error deleting ${type}:`, error); alert(`فشل حذف العنصر.`); } 
+            showNotification('تم الحذف بنجاح.', 'success');
+        } catch (error) { console.error(`Error deleting ${type}:`, error); showNotification(`فشل حذف العنصر.`, 'error'); } 
         finally { confirmDeleteBtn.disabled = false; confirmDeleteBtn.textContent = 'نعم، قم بالحذف'; itemToDelete = null; }
     }
     
     confirmDeleteBtn.addEventListener('click', executeDelete);
     cancelDeleteBtn.addEventListener('click', () => { deleteConfirmModal.style.display = 'none'; itemToDelete = null; });
+    loadMoreBtn.addEventListener('click', () => {
+        loadMoreSubmissions();
+    });
 
     examsListContainer.addEventListener('click', (e) => { 
         const button = e.target.closest('button'); 
@@ -339,7 +430,8 @@
         if (button?.classList.contains('view-submissions-btn')) { 
             examsView.classList.add('hidden'); 
             submissionsView.classList.remove('hidden'); 
-            loadSubmissions(button.dataset.examId, button.dataset.examTitle); 
+            const examId = button.dataset.examId;
+            loadSubmissions(examId, button.dataset.examTitle); 
         } 
         if (button?.classList.contains('share-submissions-btn')) {
             const link = button.dataset.link;
@@ -362,3 +454,4 @@
   </script>
 </body>
 </html>
+
