@@ -39,6 +39,8 @@
     @media (max-width: 850px) {
       #submissions-list-container { grid-template-columns: 1fr; }
     }
+    .loader { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.5); border-top-color: #FFF; border-radius: 50%; display: inline-block; animation: rotation 0.8s linear infinite; }
+    @keyframes rotation { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -62,7 +64,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy, where, startAfter, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
-    // تأكد من تحديث هذه القيم بمعلومات مشروعك في Firebase
     const firebaseConfig = { apiKey: "AIzaSyAFIa5WAPy8Vn9p4T4Ak3yCly3_9bwsMZU", authDomain: "database-506.firebaseapp.com", projectId: "database-506", storageBucket: "database-506.firebasestorage.app", messagingSenderId: "926446561022", appId: "1:926446561022:web:9e57f6fd1fdc3a2f58a7af" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -92,19 +93,23 @@
       loadMoreBtn.innerHTML = '<span class="loader"></span> جاري التحميل...';
       
       try {
-        let q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"), limit(BATCH_SIZE));
+        let q;
         if (lastVisible) {
             q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"), startAfter(lastVisible), limit(BATCH_SIZE));
+        } else {
+            // First load
+            q = query(collection(db, "Submissions"), where("examId", "==", examId), orderBy("submissionTime", "desc"), limit(BATCH_SIZE));
         }
-
+        
         const querySnapshot = await getDocs(q);
         const newSubmissions = querySnapshot.docs;
         
+        if (!lastVisible) {
+            // Clear content only on the first load
+            submissionsListContainer.innerHTML = '';
+        }
+
         if (newSubmissions.length > 0) {
-            if (!lastVisible) {
-                // This is the first load
-                submissionsListContainer.innerHTML = '';
-            }
             newSubmissions.forEach((doc, index) => {
                 const sub = doc.data();
                 const subId = doc.id;
