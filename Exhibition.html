@@ -41,7 +41,6 @@
     #review-btn.not-reviewed { background-color: transparent; color: var(--ink); border-color: var(--border-color); }
     #review-btn svg { width: 18px; height: 18px; }
     
-    /* ✅ قسم الحذف الجديد */
     .danger-zone { margin-top: 30px; padding: 25px; border: 1px solid var(--danger); background-color: #fee2e2; border-radius: 16px; text-align: center; }
     .danger-zone h3 { margin-top: 0; color: var(--danger-dark); }
     .danger-zone p { color: var(--muted); max-width: 500px; margin: 10px auto 20px; }
@@ -50,7 +49,6 @@
     .delete-btn:disabled { background-color: #fca5a5; cursor: not-allowed; transform: none; box-shadow: none; }
     .delete-btn svg { width: 20px; height: 20px; stroke: white; }
     
-    /* نافذة تأكيد الحذف */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
     .modal-box { background: white; padding: 30px; border-radius: 16px; width: min(400px, 90%); text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: slideUp 0.4s ease; }
     .modal-box h3 { margin-top: 0; font-size: 22px; color: var(--danger-dark); }
@@ -60,7 +58,6 @@
     #confirm-delete-btn { background-color: var(--danger); color: white; }
     #cancel-delete-btn { background-color: var(--border-color); color: var(--ink); }
     
-    /* إشعارات التوست */
     #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
     .toast { padding: 15px 25px; border-radius: 12px; color: white; font-weight: 500; box-shadow: 0 5px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.4s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -86,7 +83,7 @@
         
         <div id="content" style="display: none;">
           <div class="details-card">
-            <div class="student-info"><h2>بيانات الطالب</h2><dl class="info-grid"><div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div><div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div><div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div><div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div><div class="info-item"><dt>تاريخ الإرسال</dt><dd id="submission-timestamp"></dd></div></dl></div>
+            <div class="student-info"><h2>بيانات الطالب</h2><dl class="info-grid"><div class="info-item"><dt>الاسم الكامل</dt><dd id="student-name"></dd></div><div class="info-item"><dt>رقم الهوية</dt><dd id="student-id"></dd></div><div class="info-item"><dt>رقم الجوال</dt><dd id="student-phone"></dd></div><div class="info-item"><dt>البريد الإلكتروني</dt><dd id="student-email"></dd></div><div class="info-item"><dt>حالة الإجابة</dt><dd id="submission-status"></dd></div></dl></div>
             <div id="answers-container"></div>
           </div>
           <div class="danger-zone">
@@ -132,6 +129,7 @@
     const deleteModal = document.getElementById('delete-modal');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const submissionStatusDd = document.getElementById('submission-status');
 
     function displayState(state, message = '') {
         loader.style.display = (state === 'loading') ? 'block' : 'none';
@@ -182,33 +180,49 @@
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                
-                // ✅ الكود الجديد: فحص حالة الطالب
-                if (data.status === 'in-progress') {
-                    displayState('error', '⚠️ الطالب مازال في الاختبار. لا توجد إجابات للعرض حتى الآن.');
-                    document.getElementById('delete-btn').disabled = true;
-                    return;
-                }
-                
+
                 document.getElementById('student-name').textContent = data.name || 'غير متوفر';
                 document.getElementById('student-id').textContent = data.idNumber || 'غير متوفر';
                 document.getElementById('student-phone').textContent = data.phone || 'غير متوفر';
                 document.getElementById('student-email').textContent = data.email || 'غير متوفر';
-                document.getElementById('submission-timestamp').textContent = data.submissionTime?.toDate() ? data.submissionTime.toDate().toLocaleString('ar-SA', { dateStyle: 'long', timeStyle: 'short' }) : 'غير متوفر';
                 
-                const answersContainer = document.getElementById('answers-container');
-                answersContainer.innerHTML = '';
-                if (data.answers && Array.isArray(data.answers)) {
-                    data.answers.forEach((item, index) => {
-                        const answerBlock = document.createElement('div');
-                        answerBlock.className = 'answer-block';
-                        answerBlock.innerHTML = `<div class="answer-header"><h3>السؤال ${index + 1}: ${item.question}</h3><span class="word-count-badge">عدد الكلمات: ${item.wordCount}</span></div><div class="answer-text">${(item.answer || "").replace(/\n/g, '<br>') || '<em>لم تتم الإجابة.</em>'}</div>`;
-                        answersContainer.appendChild(answerBlock);
-                    });
-                } else {
-                    answersContainer.innerHTML = `<div class="status-card" style="box-shadow: none;"><p>لا توجد إجابات لهذا الاختبار. ربما لم يتم إرساله.</p></div>`;
-                }
+                // ✅ الكود الجديد: عرض حالة الإجابة وتاريخ الإرسال
+                if (data.status === 'in-progress') {
+                  submissionStatusDd.textContent = 'قيد الاختبار';
+                  submissionStatusDd.style.color = 'var(--brand-dark)';
+                  submissionStatusDd.style.fontWeight = 'bold';
+                  const submissionTimeItem = document.createElement('div');
+                  submissionTimeItem.className = 'info-item';
+                  submissionTimeItem.innerHTML = `<dt>تاريخ البدء</dt><dd>${data.submissionTime?.toDate() ? data.submissionTime.toDate().toLocaleString('ar-SA', { dateStyle: 'long', timeStyle: 'short' }) : 'غير متوفر'}</dd>`;
+                  document.querySelector('.info-grid').appendChild(submissionTimeItem);
 
+                  const answersContainer = document.getElementById('answers-container');
+                  answersContainer.innerHTML = `<div class="status-card" style="box-shadow: none;"><p>الطالب مازال في الاختبار. لا توجد إجابات للعرض حتى الآن.</p></div>`;
+
+                } else {
+                  submissionStatusDd.textContent = 'تم الإرسال';
+                  submissionStatusDd.style.color = 'var(--success)';
+                  submissionStatusDd.style.fontWeight = 'bold';
+                  const submissionTimeItem = document.createElement('div');
+                  submissionTimeItem.className = 'info-item';
+                  submissionTimeItem.innerHTML = `<dt>تاريخ الإرسال</dt><dd>${data.submissionTime?.toDate() ? data.submissionTime.toDate().toLocaleString('ar-SA', { dateStyle: 'long', timeStyle: 'short' }) : 'غير متوفر'}</dd>`;
+                  document.querySelector('.info-grid').appendChild(submissionTimeItem);
+                  
+                  const answersContainer = document.getElementById('answers-container');
+                  answersContainer.innerHTML = '';
+                  if (data.answers && Array.isArray(data.answers)) {
+                      data.answers.forEach((item, index) => {
+                          const answerBlock = document.createElement('div');
+                          answerBlock.className = 'answer-block';
+                          answerBlock.innerHTML = `<div class="answer-header"><h3>السؤال ${index + 1}: ${item.question}</h3><span class="word-count-badge">عدد الكلمات: ${item.wordCount}</span></div><div class="answer-text">${(item.answer || "").replace(/\n/g, '<br>') || '<em>لم تتم الإجابة.</em>'}</div>`;
+                          answersContainer.appendChild(answerBlock);
+                      });
+                  } else {
+                      answersContainer.innerHTML = `<div class="status-card" style="box-shadow: none;"><p>لا توجد إجابات لهذا الاختبار. ربما لم يتم إرساله.</p></div>`;
+                  }
+
+                }
+                
                 const reviewBtn = document.createElement('button');
                 reviewBtn.id = 'review-btn';
                 updateReviewButton(reviewBtn, data.isReviewed || false);
@@ -216,6 +230,7 @@
                 headerActions.insertBefore(reviewBtn, headerActions.firstChild);
                 
                 displayState('success');
+                // ✅ الكود الجديد: تفعيل زر الحذف دائماً
                 deleteBtn.disabled = false;
             } else { displayState('error', 'عذراً، هذه الإجابة غير موجودة. ربما تم حذفها.'); }
         } catch (error) { console.error("Error fetching document:", error); displayState('error', 'حدث خطأ فني أثناء جلب البيانات.'); }
